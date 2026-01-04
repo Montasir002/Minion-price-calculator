@@ -1,0 +1,20 @@
+{
+  "name": "Bamboo Minion",
+  "max_tier": 11,
+  "tiers": {
+    "1": [
+      { "item": "Wooden Axe", "qty": 1 },
+      { "item": "Bamboo", "qty": 80 }
+    ],
+    "2": [{ "item": "Bamboo", "qty": 160 }],
+    "3": [{ "item": "Bamboo", "qty": 320 }],
+    "4": [{ "item": "Bamboo", "qty": 512 }],
+    "5": [{ "item": "Enchanted Bamboo", "qty": 8 }],
+    "6": [{ "item": "Enchanted Bamboo", "qty": 16 }],
+    "7": [{ "item": "Enchanted Bamboo", "qty": 32 }],
+    "8": [{ "item": "Enchanted Bamboo", "qty": 64 }],
+    "9": [{ "item": "Enchanted Bamboo", "qty": 128 }],
+    "10": [{ "item": "Enchanted Bamboo", "qty": 256 }],
+    "11": [{ "item": "Enchanted Bamboo", "qty": 512 }]
+  }
+}
