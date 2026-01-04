@@ -1,0 +1,20 @@
+{
+  "name": "Cactus Minion",
+  "max_tier": 11,
+  "tiers": {
+    "1": [
+      { "item": "Wooden Hoe", "qty": 1 },
+      { "item": "Cactus", "qty": 128 }
+    ],
+    "2": [{ "item": "Cactus", "qty": 256 }],
+    "3": [{ "item": "Cactus", "qty": 512 }],
+    "4": [{ "item": "Enchanted Cactus Green", "qty": 8 }],
+    "5": [{ "item": "Enchanted Cactus Green", "qty": 24 }],
+    "6": [{ "item": "Enchanted Cactus Green", "qty": 64 }],
+    "7": [{ "item": "Enchanted Cactus Green", "qty": 128 }],
+    "8": [{ "item": "Enchanted Cactus Green", "qty": 256 }],
+    "9": [{ "item": "Enchanted Cactus Green", "qty": 512 }],
+    "10": [{ "item": "Enchanted Cactus", "qty": 8 }],
+    "11": [{ "item": "Enchanted Cactus", "qty": 16 }]
+  }
+}
