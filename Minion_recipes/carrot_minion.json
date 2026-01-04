@@ -1,0 +1,20 @@
+{
+  "name": "Carrot Minion",
+  "max_tier": 11,
+  "tiers": {
+    "1": [
+      { "item": "Wooden Hoe", "qty": 1 },
+      { "item": "Carrot", "qty": 128 }
+    ],
+    "2": [{ "item": "Carrot", "qty": 256 }],
+    "3": [{ "item": "Carrot", "qty": 512 }],
+    "4": [{ "item": "Enchanted Carrot", "qty": 8 }],
+    "5": [{ "item": "Enchanted Carrot", "qty": 24 }],
+    "6": [{ "item": "Enchanted Carrot", "qty": 64 }],
+    "7": [{ "item": "Enchanted Carrot", "qty": 128 }],
+    "8": [{ "item": "Enchanted Carrot", "qty": 256 }],
+    "9": [{ "item": "Enchanted Carrot", "qty": 512 }],
+    "10": [{ "item": "Enchanted Golden Carrot", "qty": 8 }],
+    "11": [{ "item": "Enchanted Golden Carrot", "qty": 16 }]
+  }
+}
