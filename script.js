@@ -35,6 +35,10 @@ if (!minionSelect.value) {
 }
 
 function loadMinion() {
+  if (!minionSelect.value) {
+  alert("Please select a minion type");
+  return;
+}
   materialsDiv.innerHTML = "";
   totalDiv.textContent = "Loading...";
 
