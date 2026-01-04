@@ -1,5 +1,6 @@
 {
   "minions": [
+    { "id": "carrot_minion", "name": "Carrot Minion", "file": "carrot_minion.json" },
     { "id": "acacia_log_minion", "name": "Acacia Log Minion", "file": "acacia_log_minion.json" },
     { "id": "beetroot_minion", "name": "Beetroot Minion", "file": "beetroot_minion.json" },
     { "id": "birch_log_minion", "name": "Birch Log Minion", "file": "birch_log_minion.json" },
