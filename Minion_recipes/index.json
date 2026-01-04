@@ -10,5 +10,6 @@
     { "id": "chicken_minion", "name": "Chicken Minion", "file": "chicken_minion.json" },
     { "id": "coal_minion", "name": "Coal Minion", "file": "coal_minion.json" },
     { "id": "cobblestone_minion", "name": "Cobblestone Minion", "file": "cobblestone_minion.json" }
+    { "id": "wheat_minion", "name": "Wheat Minion", "file": "wheat_minion.json" },
   ]
 }
