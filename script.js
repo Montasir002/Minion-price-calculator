@@ -1,4 +1,4 @@
-const LIB_BASE = "https://montasir002.github.io/minion-recipes/";
+const LIB_BASE = "./Minion_recipes/";
 
 const minionSelect = document.getElementById("minionSelect");
 const tierSelect = document.getElementById("tierSelect");
