@@ -30,62 +30,64 @@ loadBtn.onclick = loadMinion;
 
 function loadMinion() {
   if (!minionSelect.value) {
-  alert("Please select a minion type");
-  return;
-}
-  materialsDiv.innerHTML = "";
-  totalDiv.textContent = "Loading...";
+    alert("Please select a minion type");
+    return;
+  }
+
+  materialsDiv.innerHTML = "Loading...";
+  totalDiv.innerHTML = "";
 
   fetch(LIB_BASE + minionSelect.value)
     .then(r => r.json())
     .then(minion => {
-      const runningTotals = {};
-      materialsDiv.innerHTML = "";
-      totalDiv.textContent = "";
+      const materials = {};
 
+      // collect ALL materials across tiers
       for (let t = 1; t <= minion.max_tier; t++) {
         (minion.tiers[t] || []).forEach(mat => {
-          runningTotals[mat.item] =
-            (runningTotals[mat.item] || 0) + mat.qty;
-        });
-
-        const tierBox = document.createElement("div");
-        tierBox.className = "row";
-        tierBox.innerHTML = `<b>Tier ${t}</b>`;
-        materialsDiv.appendChild(tierBox);
-
-        Object.entries(runningTotals).forEach(([item, qty]) => {
-          const row = document.createElement("div");
-          row.className = "row";
-          row.innerHTML = `
-            ${item} × ${qty}
-            → <input type="number" min="0" data-tier="${t}" data-item="${item}">
-          `;
-          materialsDiv.appendChild(row);
+          materials[mat.item] = true;
         });
       }
 
+      materialsDiv.innerHTML = "<b>Enter material prices</b><br>";
+
+      Object.keys(materials).forEach(item => {
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+          ${item} price →
+          <input type="number" min="0" data-item="${item}">
+        `;
+        materialsDiv.appendChild(row);
+      });
+
       const btn = document.createElement("button");
-      btn.textContent = "Calculate All Tier Costs";
-      btn.onclick = calculateAllTiers;
+      btn.textContent = "Calculate Tier Prices";
+      btn.onclick = () => calculateTierPrices(minion);
       materialsDiv.appendChild(btn);
     });
 }
 
-function calculateAllTiers() {
-  const tierTotals = {};
+function calculateTierPrices(minion) {
+  const prices = {};
 
   document.querySelectorAll("#materials input").forEach(inp => {
-    const tier = inp.dataset.tier;
-    const price = Number(inp.value || 0);
-    const qty = Number(inp.dataset.qty);
-
-    tierTotals[tier] =
-      (tierTotals[tier] || 0) + price * qty;
+    prices[inp.dataset.item] = Number(inp.value || 0);
   });
 
-  totalDiv.innerHTML = "<b>Total Cost Per Tier</b><br>";
-  Object.entries(tierTotals).forEach(([tier, cost]) => {
-    totalDiv.innerHTML += `Tier ${tier}: ${cost.toLocaleString()}<br>`;
-  });
+  let cumulativeCost = 0;
+  totalDiv.innerHTML = "<b>Minion Craft Cost per Tier</b><br>";
+
+  for (let t = 1; t <= minion.max_tier; t++) {
+    let tierCost = 0;
+
+    (minion.tiers[t] || []).forEach(mat => {
+      tierCost += (prices[mat.item] || 0) * mat.qty;
+    });
+
+    cumulativeCost += tierCost;
+
+    totalDiv.innerHTML +=
+      `Tier ${t}: ${cumulativeCost.toLocaleString()}<br>`;
+  }
 }
