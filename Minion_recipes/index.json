@@ -5,5 +5,6 @@
     { "id": "carrot_minion", "name": "Carrot Minion", "file": "carrot_minion.json" },
     { "id": "coal_minion", "name": "Coal Minion", "file": "coal_minion.json" },
     { "id": "wheat_minion", "name": "Wheat Minion", "file": "wheat_minion.json" },
+    { "id": "potato_minion", "name": "Potato Minion", "file": "potato_minion.json" },
   ]
 }
