@@ -29,11 +29,6 @@ fetch(LIB_BASE + "index.json")
 
 loadBtn.onclick = loadMinion;
 
-if (!minionSelect.value) {
-  alert("Please select a minion type");
-  return;
-}
-
 function loadMinion() {
   if (!minionSelect.value) {
   alert("Please select a minion type");
