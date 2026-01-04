@@ -1,0 +1,20 @@
+{
+  "name": "Acacia Log Minion",
+  "max_tier": 11,
+  "tiers": {
+    "1": [
+      { "item": "Wooden Axe", "qty": 1 },
+      { "item": "Acacia Log", "qty": 80 }
+    ],
+    "2": [{ "item": "Acacia Log", "qty": 160 }],
+    "3": [{ "item": "Acacia Log", "qty": 320 }],
+    "4": [{ "item": "Acacia Log", "qty": 512 }],
+    "5": [{ "item": "Enchanted Acacia Log", "qty": 8 }],
+    "6": [{ "item": "Enchanted Acacia Log", "qty": 16 }],
+    "7": [{ "item": "Enchanted Acacia Log", "qty": 32 }],
+    "8": [{ "item": "Enchanted Acacia Log", "qty": 64 }],
+    "9": [{ "item": "Enchanted Acacia Log", "qty": 128 }],
+    "10": [{ "item": "Enchanted Acacia Log", "qty": 256 }],
+    "11": [{ "item": "Enchanted Acacia Log", "qty": 512 }]
+  }
+}
