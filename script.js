@@ -40,14 +40,12 @@ function loadMinion() {
   fetch(LIB_BASE + minionSelect.value)
     .then(r => r.json())
     .then(minion => {
-
-      // 1. Collect unique materials
       const materialSet = new Set();
+
       for (let t = 1; t <= minion.max_tier; t++) {
         (minion.tiers[t] || []).forEach(m => materialSet.add(m.item));
       }
 
-      // 2. Render inputs ONCE
       materialsDiv.innerHTML = "<b>Enter material prices</b><br>";
       materialSet.forEach(item => {
         materialsDiv.innerHTML += `
@@ -56,7 +54,6 @@ function loadMinion() {
         `;
       });
 
-      // 3. Calculate button
       const btn = document.createElement("button");
       btn.textContent = "Calculate Tier Prices";
       btn.onclick = () => calculateTierPrices(minion);
