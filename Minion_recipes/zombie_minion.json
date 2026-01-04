@@ -1,0 +1,20 @@
+{
+    "name": "Zombie Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Sword", "qty": 1 },
+            { "item": "Rotten Flesh", "qty": 80 }
+        ],
+        "2": [{ "item": "Rotten Flesh", "qty": 160 }],
+        "3": [{ "item": "Rotten Flesh", "qty": 320 }],
+        "4": [{ "item": "Rotten Flesh", "qty": 512 }],
+        "5": [{ "item": "Enchanted Rotten Flesh", "qty": 8 }],
+        "6": [{ "item": "Enchanted Rotten Flesh", "qty": 16 }],
+        "7": [{ "item": "Enchanted Rotten Flesh", "qty": 32 }],
+        "8": [{ "item": "Enchanted Rotten Flesh", "qty": 64 }],
+        "9": [{ "item": "Enchanted Rotten Flesh", "qty": 128 }],
+        "10": [{ "item": "Enchanted Rotten Flesh", "qty": 256 }],
+        "11": [{ "item": "Enchanted Rotten Flesh", "qty": 512 }]
+    }
+}
