@@ -1,0 +1,20 @@
+{
+  "name": "Birch Log Minion",
+  "max_tier": 11,
+  "tiers": {
+    "1": [
+      { "item": "Wooden Axe", "qty": 1 },
+      { "item": "Birch Log", "qty": 80 }
+    ],
+    "2": [{ "item": "Birch Log", "qty": 160 }],
+    "3": [{ "item": "Birch Log", "qty": 320 }],
+    "4": [{ "item": "Birch Log", "qty": 512 }],
+    "5": [{ "item": "Enchanted Birch Log", "qty": 8 }],
+    "6": [{ "item": "Enchanted Birch Log", "qty": 16 }],
+    "7": [{ "item": "Enchanted Birch Log", "qty": 32 }],
+    "8": [{ "item": "Enchanted Birch Log", "qty": 64 }],
+    "9": [{ "item": "Enchanted Birch Log", "qty": 128 }],
+    "10": [{ "item": "Enchanted Birch Log", "qty": 256 }],
+    "11": [{ "item": "Enchanted Birch Log", "qty": 512 }]
+  }
+}
