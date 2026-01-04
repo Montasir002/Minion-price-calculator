@@ -49,9 +49,11 @@ function loadMinion() {
       materialsDiv.innerHTML = "<b>Enter material prices</b><br>";
       materialSet.forEach(item => {
         materialsDiv.innerHTML += `
-          ${item} × 1 →
-          <input type="number" min="0" data-item="${item}"><br>
-        `;
+  <div class="material-row">
+    <span>${item} × 1</span>
+    <input type="number" min="0" data-item="${item}">
+  </div>
+`;
       });
 
       const btn = document.createElement("button");
@@ -78,7 +80,11 @@ function calculateTierPrices(minion) {
     });
 
     total += tierCost;
-    totalDiv.innerHTML +=
-      `${minion.name} T${t} = ${total.toLocaleString()} coins<br>`;
+    totalDiv.innerHTML += `
+  <div class="tier-row">
+    <span>${minion.name} T${t}</span>
+    <span>${total.toLocaleString()} coins</span>
+  </div>
+`;
   }
 }
