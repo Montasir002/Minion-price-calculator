@@ -1,0 +1,20 @@
+{
+  "name": "Chicken Minion",
+  "max_tier": 11,
+  "tiers": {
+    "1": [
+      { "item": "Wooden Sword", "qty": 1 },
+      { "item": "Raw Chicken", "qty": 64 }
+    ],
+    "2": [{ "item": "Raw Chicken", "qty": 128 }],
+    "3": [{ "item": "Raw Chicken", "qty": 256 }],
+    "4": [{ "item": "Raw Chicken", "qty": 512 }],
+    "5": [{ "item": "Enchanted Raw Chicken", "qty": 8 }],
+    "6": [{ "item": "Enchanted Raw Chicken", "qty": 16 }],
+    "7": [{ "item": "Enchanted Raw Chicken", "qty": 32 }],
+    "8": [{ "item": "Enchanted Raw Chicken", "qty": 64 }],
+    "9": [{ "item": "Enchanted Raw Chicken", "qty": 128 }],
+    "10": [{ "item": "Enchanted Raw Chicken", "qty": 256 }],
+    "11": [{ "item": "Enchanted Raw Chicken", "qty": 512 }]
+  }
+}
