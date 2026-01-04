@@ -1,0 +1,20 @@
+{
+  "name": "Blaze Minion",
+  "max_tier": 11,
+  "tiers": {
+    "1": [
+      { "item": "Wooden Sword", "qty": 1 },
+      { "item": "Blaze Rod", "qty": 80 }
+    ],
+    "2": [{ "item": "Blaze Rod", "qty": 160 }],
+    "3": [{ "item": "Blaze Rod", "qty": 320 }],
+    "4": [{ "item": "Blaze Rod", "qty": 512 }],
+    "5": [{ "item": "Enchanted Blaze Powder", "qty": 8 }],
+    "6": [{ "item": "Enchanted Blaze Powder", "qty": 24 }],
+    "7": [{ "item": "Enchanted Blaze Powder", "qty": 64 }],
+    "8": [{ "item": "Enchanted Blaze Powder", "qty": 128 }],
+    "9": [{ "item": "Enchanted Blaze Powder", "qty": 256 }],
+    "10": [{ "item": "Enchanted Blaze Powder", "qty": 512 }],
+    "11": [{ "item": "Enchanted Blaze Rod", "qty": 8 }]
+  }
+}
