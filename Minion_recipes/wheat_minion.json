@@ -1,0 +1,20 @@
+{
+  "name": "Wheat Minion",
+  "max_tier": 11,
+  "tiers": {
+    "1": [
+      { "item": "Wooden Hoe", "qty": 1 },
+      { "item": "Wheat", "qty": 80 }
+    ],
+    "2": [{ "item": "Wheat", "qty": 160 }],
+    "3": [{ "item": "Wheat", "qty": 320 }],
+    "4": [{ "item": "Wheat", "qty": 512 }],
+    "5": [{ "item": "Enchanted Wheat", "qty": 8 }],
+    "6": [{ "item": "Enchanted Wheat", "qty": 16 }],
+    "7": [{ "item": "Enchanted Wheat", "qty": 32 }],
+    "8": [{ "item": "Enchanted Wheat", "qty": 64 }],
+    "9": [{ "item": "Enchanted Wheat", "qty": 128 }],
+    "10": [{ "item": "Enchanted Wheat", "qty": 256 }],
+    "11": [{ "item": "Enchanted Wheat", "qty": 512 }]
+  }
+}
