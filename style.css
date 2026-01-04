@@ -1,0 +1,29 @@
+body {
+  background: #0f0f0f;
+  color: #eaeaea;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+select, input, button {
+  padding: 6px;
+  background: #1e1e1e;
+  color: #eaeaea;
+  border: 1px solid #333;
+}
+
+.row {
+  margin: 6px 0;
+}
+
+#total {
+  margin-top: 15px;
+  font-size: 18px;
+  font-weight: bold;
+}
