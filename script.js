@@ -62,6 +62,7 @@ function loadMinion() {
       btn.onclick = () => calculateTierPrices(minion);
       materialsDiv.appendChild(btn);
     });
+}
 
 function calculateTierPrices(minion) {
   const prices = {};
