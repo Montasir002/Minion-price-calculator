@@ -27,3 +27,23 @@ select, input, button {
   font-size: 18px;
   font-weight: bold;
 }
+
+.tier-row {
+  display: grid;
+  grid-template-columns: 1fr 160px;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.material-row {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.material-row input {
+  width: 100%;
+  padding: 4px;
+}
