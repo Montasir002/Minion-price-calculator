@@ -40,54 +40,47 @@ function loadMinion() {
   fetch(LIB_BASE + minionSelect.value)
     .then(r => r.json())
     .then(minion => {
-      const materials = {};
 
-      // collect ALL materials across tiers
+      // 1. Collect unique materials
+      const materialSet = new Set();
       for (let t = 1; t <= minion.max_tier; t++) {
-        (minion.tiers[t] || []).forEach(mat => {
-          materials[mat.item] = true;
-        });
+        (minion.tiers[t] || []).forEach(m => materialSet.add(m.item));
       }
 
+      // 2. Render inputs ONCE
       materialsDiv.innerHTML = "<b>Enter material prices</b><br>";
-
-      Object.keys(materials).forEach(item => {
-        const row = document.createElement("div");
-        row.className = "row";
-        row.innerHTML = `
-          ${item} price →
-          <input type="number" min="0" data-item="${item}">
+      materialSet.forEach(item => {
+        materialsDiv.innerHTML += `
+          ${item} × 1 →
+          <input type="number" min="0" data-item="${item}"><br>
         `;
-        materialsDiv.appendChild(row);
       });
 
+      // 3. Calculate button
       const btn = document.createElement("button");
       btn.textContent = "Calculate Tier Prices";
       btn.onclick = () => calculateTierPrices(minion);
       materialsDiv.appendChild(btn);
     });
-}
 
 function calculateTierPrices(minion) {
   const prices = {};
-
-  document.querySelectorAll("#materials input").forEach(inp => {
-    prices[inp.dataset.item] = Number(inp.value || 0);
+  document.querySelectorAll("#materials input").forEach(i => {
+    prices[i.dataset.item] = Number(i.value || 0);
   });
 
-  let cumulativeCost = 0;
-  totalDiv.innerHTML = "<b>Minion Craft Cost per Tier</b><br>";
+  let total = 0;
+  totalDiv.innerHTML = "<b>Craft Cost Per Tier</b><br>";
 
   for (let t = 1; t <= minion.max_tier; t++) {
     let tierCost = 0;
 
-    (minion.tiers[t] || []).forEach(mat => {
-      tierCost += (prices[mat.item] || 0) * mat.qty;
+    (minion.tiers[t] || []).forEach(m => {
+      tierCost += (prices[m.item] || 0) * m.qty;
     });
 
-    cumulativeCost += tierCost;
-
+    total += tierCost;
     totalDiv.innerHTML +=
-      `Tier ${t}: ${cumulativeCost.toLocaleString()}<br>`;
+      `${minion.name} T${t} = ${total.toLocaleString()} coins<br>`;
   }
 }
