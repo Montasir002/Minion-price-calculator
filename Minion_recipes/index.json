@@ -1,0 +1,14 @@
+{
+  "minions": [
+    { "id": "acacia_log_minion", "name": "Acacia Log Minion", "file": "acacia_log_minion.json" },
+    { "id": "beetroot_minion", "name": "Beetroot Minion", "file": "beetroot_minion.json" },
+    { "id": "birch_log_minion", "name": "Birch Log Minion", "file": "birch_log_minion.json" },
+    { "id": "blaze_minion", "name": "Blaze Minion", "file": "blaze_minion.json" },
+    { "id": "cactus_minion", "name": "Cactus Minion", "file": "cactus_minion.json" },
+    { "id": "carrot_minion", "name": "Carrot Minion", "file": "carrot_minion.json" },
+    { "id": "cave_spider_minion", "name": "Cave Spider Minion", "file": "cave_spider_minion.json" },
+    { "id": "chicken_minion", "name": "Chicken Minion", "file": "chicken_minion.json" },
+    { "id": "coal_minion", "name": "Coal Minion", "file": "coal_minion.json" },
+    { "id": "cobblestone_minion", "name": "Cobblestone Minion", "file": "cobblestone_minion.json" }
+  ]
+}
