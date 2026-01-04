@@ -1,0 +1,20 @@
+{
+    "name": "Cocoa Beans Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Hoe", "qty": 1 },
+            { "item": "Cocoa Beans", "qty": 80 }
+        ],
+        "2": [{ "item": "Cocoa Beans", "qty": 160 }],
+        "3": [{ "item": "Cocoa Beans", "qty": 320 }],
+        "4": [{ "item": "Cocoa Beans", "qty": 512 }],
+        "5": [{ "item": "Enchanted Cocoa Beans", "qty": 8 }],
+        "6": [{ "item": "Enchanted Cocoa Beans", "qty": 24 }],
+        "7": [{ "item": "Enchanted Cocoa Beans", "qty": 64 }],
+        "8": [{ "item": "Enchanted Cocoa Beans", "qty": 128 }],
+        "9": [{ "item": "Enchanted Cocoa Beans", "qty": 256 }],
+        "10": [{ "item": "Enchanted Cocoa Beans", "qty": 512 }],
+        "11": [{ "item": "Enchanted Cookie", "qty": 8 }]
+    }
+}
