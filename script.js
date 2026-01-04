@@ -1,7 +1,6 @@
 const LIB_BASE = "./Minion_recipes/";
 
 const minionSelect = document.getElementById("minionSelect");
-const tierSelect = document.getElementById("tierSelect");
 const materialsDiv = document.getElementById("materials");
 const totalDiv = document.getElementById("total");
 const loadBtn = document.getElementById("loadBtn");
@@ -79,24 +78,14 @@ function calculateAllTiers() {
   document.querySelectorAll("#materials input").forEach(inp => {
     const tier = inp.dataset.tier;
     const price = Number(inp.value || 0);
+    const qty = Number(inp.dataset.qty);
 
-    tierTotals[tier] = (tierTotals[tier] || 0) + price;
+    tierTotals[tier] =
+      (tierTotals[tier] || 0) + price * qty;
   });
 
   totalDiv.innerHTML = "<b>Total Cost Per Tier</b><br>";
   Object.entries(tierTotals).forEach(([tier, cost]) => {
     totalDiv.innerHTML += `Tier ${tier}: ${cost.toLocaleString()}<br>`;
   });
-}
-
-function calculateTotal() {
-  let total = 0;
-  document.querySelectorAll("#materials input").forEach(inp => {
-    const price = Number(inp.value || 0);
-    const qty = Number(inp.dataset.qty);
-    total += price * qty;
-  });
-
-  totalDiv.textContent =
-    "Total Crafting Cost: " + total.toLocaleString();
 }
