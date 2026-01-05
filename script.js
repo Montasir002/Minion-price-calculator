@@ -38,7 +38,7 @@ function loadMinion() {
   totalDiv.innerHTML = "";
 
   // fetch ignore list
-  fetch("./Minion_rrcipes/ignore_list.json")
+  fetch("./Minion_recipes/ignore_list.json")
     .then(r => r.json())
     .then(ignoreData => {
       const ignoreItems = ignoreData.map(i => i.item); // array of items to ignore
