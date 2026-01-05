@@ -37,29 +37,45 @@ function loadMinion() {
   materialsDiv.innerHTML = "Loading...";
   totalDiv.innerHTML = "";
 
-  fetch(LIB_BASE + minionSelect.value)
+  // fetch ignore list
+  fetch("./Minion_rrcipes/ignore_list.json")
     .then(r => r.json())
-    .then(minion => {
-      const materialSet = new Set();
+    .then(ignoreData => {
+      const ignoreItems = ignoreData.map(i => i.item); // array of items to ignore
 
-      for (let t = 1; t <= minion.max_tier; t++) {
-        (minion.tiers[t] || []).forEach(m => materialSet.add(m.item));
-      }
+      // fetch selected minion
+      fetch(LIB_BASE + minionSelect.value)
+        .then(r => r.json())
+        .then(minion => {
+          const materialSet = new Set();
 
-      materialsDiv.innerHTML = "<b>Enter Bazar Prices of these items-</b><br>";
-      materialSet.forEach(item => {
-        materialsDiv.innerHTML += `
-  <div class="material-row">
-    <span>${item} × 1</span>
-    <input type="number" min="0" data-item="${item}">
-  </div>
+          for (let t = 1; t <= minion.max_tier; t++) {
+            (minion.tiers[t] || []).forEach(m => {
+              if (!ignoreItems.includes(m.item)) { // check ignore list
+                materialSet.add(m.item);
+              }
+            });
+          }
+
+          materialsDiv.innerHTML = "<b>Enter Bazar Prices of these items-</b><br>";
+          materialSet.forEach(item => {
+            materialsDiv.innerHTML += `
+<div class="material-row">
+  <span>${item} × 1</span>
+  <input type="number" min="0" data-item="${item}">
+</div>
 `;
-      });
+          });
 
-      const btn = document.createElement("button");
-      btn.textContent = "Calculate Tier Prices";
-      btn.onclick = () => calculateTierPrices(minion);
-      materialsDiv.appendChild(btn);
+          const btn = document.createElement("button");
+          btn.textContent = "Calculate Tier Prices";
+          btn.onclick = () => calculateTierPrices(minion);
+          materialsDiv.appendChild(btn);
+        });
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Failed to load ignore list or minion data");
     });
 }
 
