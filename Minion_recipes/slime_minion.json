@@ -1,0 +1,20 @@
+{
+    "name": "Slime Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Sword", "qty": 1 },
+            { "item": "Slimeball", "qty": 80 }
+        ],
+        "2": [{ "item": "Slimeball", "qty": 160 }],
+        "3": [{ "item": "Slimeball", "qty": 320 }],
+        "4": [{ "item": "Slimeball", "qty": 512 }],
+        "5": [{ "item": "Enchanted Slimeball", "qty": 8 }],
+        "6": [{ "item": "Enchanted Slimeball", "qty": 24 }],
+        "7": [{ "item": "Enchanted Slimeball", "qty": 64 }],
+        "8": [{ "item": "Enchanted Slimeball", "qty": 128 }],
+        "9": [{ "item": "Enchanted Slimeball", "qty": 256 }],
+        "10": [{ "item": "Enchanted Slimeball", "qty": 512 }],
+        "11": [{ "item": "Enchanted Slime Block", "qty": 8 }]
+    }
+}
