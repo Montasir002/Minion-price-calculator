@@ -49,12 +49,19 @@ function loadMinion() {
     .then(([ignoreData, minion]) => {
       const ignoreItems = (ignoreData.ignore || ignoreData || []).map(i => i.item);
       const materialSet = new Set();
+      const isRevenant = minion.name === "Revenant Minion";
 
       for (let t = 1; t <= minion.max_tier; t++) {
         (minion.tiers[t] || []).forEach(m => {
           if (!m.item.includes("Minion") && !ignoreItems.includes(m.item)) {
-            materialSet.add(m.item);
-          }
+  materialSet.add(m.item);
+}
+
+// If Revenant Minion, also pull Zombie Minion materials
+if (isRevenant && m.item.includes("Zombie Minion")) {
+  materialSet.add("Rotten Flesh");
+  materialSet.add("Enchanted Rotten Flesh");
+}
         });
       }
 
