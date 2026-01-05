@@ -37,15 +37,22 @@ function loadMinion() {
   materialsDiv.innerHTML = "Loading...";
   totalDiv.innerHTML = "";
 
-  // fetch ignore list
-fetch(LIB_BASE + "ignore_list.json")
-    .then(r => r.json())
+  // fetch ignore list (accept either an array or { ignore: [...] })
+  fetch(LIB_BASE + "ignore_list.json")
+    .then(r => {
+      if (!r.ok) throw new Error("Ignore list not found");
+      return r.json();
+    })
     .then(ignoreData => {
-      const ignoreItems = ignoreData.map(i => i.item); // array of items to ignore
+      const list = Array.isArray(ignoreData) ? ignoreData : (ignoreData.ignore || []);
+      const ignoreItems = list.map(i => i.item); // array of items to ignore
 
       // fetch selected minion
-      fetch(LIB_BASE + minionSelect.value)
-        .then(r => r.json())
+      return fetch(LIB_BASE + minionSelect.value)
+        .then(r => {
+          if (!r.ok) throw new Error("Minion file not found");
+          return r.json();
+        })
         .then(minion => {
           const materialSet = new Set();
 
@@ -59,12 +66,7 @@ fetch(LIB_BASE + "ignore_list.json")
 
           materialsDiv.innerHTML = "<b>Enter Bazar Prices of these items-</b><br>";
           materialSet.forEach(item => {
-            materialsDiv.innerHTML += `
-<div class="material-row">
-  <span>${item} × 1</span>
-  <input type="number" min="0" data-item="${item}">
-</div>
-`;
+            materialsDiv.innerHTML += `\n<div class="material-row">\n  <span>${item} × 1</span>\n  <input type="number" min="0" data-item="${item}">\n</div>\n`;
           });
 
           const btn = document.createElement("button");
@@ -96,11 +98,6 @@ function calculateTierPrices(minion) {
     });
 
     total += tierCost;
-    totalDiv.innerHTML += `
-  <div class="tier-row">
-    <span>${minion.name} T${t}</span>
-    <span>${total.toLocaleString()} coins</span>
-  </div>
-`;
+    totalDiv.innerHTML += `\n  <div class="tier-row">\n    <span>${minion.name} T${t}</span>\n    <span>${total.toLocaleString()} coins</span>\n  </div>\n`;
   }
 }
