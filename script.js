@@ -46,7 +46,7 @@ function loadMinion() {
         (minion.tiers[t] || []).forEach(m => materialSet.add(m.item));
       }
 
-      materialsDiv.innerHTML = "<b>Enter material prices</b><br>";
+      materialsDiv.innerHTML = "<b>Enter Bazar Prices of these items-</b><br>";
       materialSet.forEach(item => {
         materialsDiv.innerHTML += `
   <div class="material-row">
