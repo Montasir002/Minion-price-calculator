@@ -1,0 +1,20 @@
+{
+    "name": "Spruce Log Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Axe", "qty": 1 },
+            { "item": "Spruce Log", "qty": 80 }
+        ],
+        "2": [{ "item": "Spruce Log", "qty": 160 }],
+        "3": [{ "item": "Spruce Log", "qty": 320 }],
+        "4": [{ "item": "Spruce Log", "qty": 512 }],
+        "5": [{ "item": "Enchanted Spruce Log", "qty": 8 }],
+        "6": [{ "item": "Enchanted Spruce Log", "qty": 16 }],
+        "7": [{ "item": "Enchanted Spruce Log", "qty": 32 }],
+        "8": [{ "item": "Enchanted Spruce Log", "qty": 64 }],
+        "9": [{ "item": "Enchanted Spruce Log", "qty": 128 }],
+        "10": [{ "item": "Enchanted Spruce Log", "qty": 256 }],
+        "11": [{ "item": "Enchanted Spruce Log", "qty": 512 }]
+    }
+}
