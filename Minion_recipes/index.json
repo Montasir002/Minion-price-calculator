@@ -10,8 +10,35 @@
     { "id": "chicken_minion", "name": "Chicken Minion", "file": "chicken_minion.json" },
     { "id": "coal_minion", "name": "Coal Minion", "file": "coal_minion.json" },
     { "id": "cobblestone_minion", "name": "Cobblestone Minion", "file": "cobblestone_minion.json" },
-    { "id": "wheat_minion", "name": "Wheat Minion", "file": "wheat_minion.json" },
+    { "id": "cocoa_beans_minion", "name": "Cocoa Beans Minion", "file": "cocoa_beans_minion.json" },
+    { "id": "cow_minion", "name": "Cow Minion", "file": "cow_minion.json" },
+    { "id": "creeper_minion", "name": "Creeper Minion", "file": "creeper_minion.json" },
+    { "id": "diamond_minion", "name": "Diamond Minion", "file": "diamond_minion.json" },
+    { "id": "duck_minion", "name": "Duck Minion", "file": "duck_minion.json" },
+    { "id": "emerald_minion", "name": "Emerald Minion", "file": "emerald_minion.json" },
+    { "id": "gold_minion", "name": "Gold Minion", "file": "gold_minion.json" },
+    { "id": "ice_minion", "name": "Ice Minion", "file": "ice_minion.json" },
+    { "id": "iron_minion", "name": "Iron Minion", "file": "iron_minion.json" },
+    { "id": "jungle_log_minion", "name": "Jungle Log Minion", "file": "jungle_log_minion.json" },
+    { "id": "lapis_lazuli_minion", "name": "Lapis Lazuli Minion", "file": "lapis_lazuli_minion.json" },
+    { "id": "magma_cube_minion", "name": "Magma Cube Minion", "file": "magma_cube_minion.json" },
+    { "id": "melon_minion", "name": "Melon Minion", "file": "melon_minion.json" },
+    { "id": "mushroom_minion", "name": "Mushroom Minion", "file": "mushroom_minion.json" },
+    { "id": "oak_log_minion", "name": "Oak Log Minion", "file": "oak_log_minion.json" },
+    { "id": "obsidian_minion", "name": "Obsidian Minion", "file": "obsidian_minion.json" }
     { "id": "potato_minion", "name": "Potato Minion", "file": "potato_minion.json" },
+    { "id": "pumpkin_minion", "name": "Pumpkin Minion", "file": "pumpkin_minion.json" }
+    { "id": "pig_minion", "name": "Pig Minion", "file": "pig_minion.json" }
+    { "id": "rabbit_minion", "name": "Rabbit Minion", "file": "rabbit_minion.json" }
+    { "id": "redstone_minion", "name": "Redstone Minion", "file": "redstone_minion.json" }
+    { "id": "revenant_minion", "name": "Revenant Minion", "file": "revenant_minion.json" }
+    { "id": "sheep_minion", "name": "Sheep Minion", "file": "sheep_minion.json" }
+    { "id": "skeleton_minion", "name": "Skeleton Minion", "file": "skeleton_minion.json" }
+    { "id": "slime_minion", "name": "Slime Minion", "file": "slime_minion.json" }
+    { "id": "spider_minion", "name": "Spider Minion", "file": "spider_minion.json" }
+    { "id": "spruce_log_minion", "name": "Spruce Log Minion", "file": "spruce_log_minion.json" }
+    { "id": "sugar_cane_minion", "name": "Sugar Cane Minion", "file": "sugar_cane_minion.json" }
+    { "id": "wheat_minion", "name": "Wheat Minion", "file": "wheat_minion.json" },
     { "id": "zombie_minion", "name": "Zombie Minion", "file": "zombie_minion.json" }
   ]
 }
