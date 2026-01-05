@@ -1,0 +1,20 @@
+{
+    "name": "Pig Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Sword", "qty": 1 },
+            { "item": "Raw Porkchop", "qty": 64 }
+        ],
+        "2": [{ "item": "Raw Porkchop", "qty": 128 }],
+        "3": [{ "item": "Raw Porkchop", "qty": 256 }],
+        "4": [{ "item": "Raw Porkchop", "qty": 512 }],
+        "5": [{ "item": "Enchanted Raw Porkchop", "qty": 8 }],
+        "6": [{ "item": "Enchanted Raw Porkchop", "qty": 24 }],
+        "7": [{ "item": "Enchanted Raw Porkchop", "qty": 64 }],
+        "8": [{ "item": "Enchanted Raw Porkchop", "qty": 128 }],
+        "9": [{ "item": "Enchanted Raw Porkchop", "qty": 256 }],
+        "10": [{ "item": "Enchanted Raw Porkchop", "qty": 512 }],
+        "11": [{ "item": "Enchanted Cooked Porkchop", "qty": 8 }]
+    }
+}
