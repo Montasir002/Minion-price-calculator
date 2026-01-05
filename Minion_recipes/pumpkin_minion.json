@@ -1,0 +1,20 @@
+{
+    "name": "Pumpkin Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Hoe", "qty": 1 },
+            { "item": "Pumpkin", "qty": 80 }
+        ],
+        "2": [{ "item": "Pumpkin", "qty": 160 }],
+        "3": [{ "item": "Pumpkin", "qty": 320 }],
+        "4": [{ "item": "Pumpkin", "qty": 512 }],
+        "5": [{ "item": "Enchanted Pumpkin", "qty": 8 }],
+        "6": [{ "item": "Enchanted Pumpkin", "qty": 16 }],
+        "7": [{ "item": "Enchanted Pumpkin", "qty": 32 }],
+        "8": [{ "item": "Enchanted Pumpkin", "qty": 64 }],
+        "9": [{ "item": "Enchanted Pumpkin", "qty": 128 }],
+        "10": [{ "item": "Enchanted Pumpkin", "qty": 256 }],
+        "11": [{ "item": "Enchanted Pumpkin", "qty": 512 }]
+    }
+}
