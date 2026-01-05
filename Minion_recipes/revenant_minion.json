@@ -1,0 +1,50 @@
+{
+    "name": "Revenant Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Crystallized Heart", "qty": 1 },
+            { "item": "Revenant Flesh", "qty": 80 }
+        ],
+        "2": [
+            { "item": "Revenant Flesh", "qty": 140 },
+            { "item": "Zombie Minion I", "qty": 1 }
+        ],
+        "3": [
+            { "item": "Revenant Flesh", "qty": 280 },
+            { "item": "Zombie Minion II", "qty": 1 }
+        ],
+        "4": [
+            { "item": "Revenant Flesh", "qty": 448 },
+            { "item": "Zombie Minion III", "qty": 1 }
+        ],
+        "5": [
+            { "item": "Revenant Viscera", "qty": 7 },
+            { "item": "Zombie Minion IV", "qty": 1 }
+        ],
+        "6": [
+            { "item": "Revenant Viscera", "qty": 14 },
+            { "item": "Zombie Minion V", "qty": 1 }
+        ],
+        "7": [
+            { "item": "Revenant Viscera", "qty": 28 },
+            { "item": "Zombie Minion VI", "qty": 1 }
+        ],
+        "8": [
+            { "item": "Revenant Viscera", "qty": 56 },
+            { "item": "Zombie Minion VII", "qty": 1 }
+        ],
+        "9": [
+            { "item": "Revenant Viscera", "qty": 112 },
+            { "item": "Zombie Minion VIII", "qty": 1 }
+        ],
+        "10": [
+            { "item": "Revenant Viscera", "qty": 224 },
+            { "item": "Zombie Minion IX", "qty": 1 }
+        ],
+        "11": [
+            { "item": "Revenant Viscera", "qty": 448 },
+            { "item": "Zombie Minion X", "qty": 1 }
+        ]
+    }
+}
