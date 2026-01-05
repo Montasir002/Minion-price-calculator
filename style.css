@@ -1,49 +1,98 @@
+/* ===== Base / Mobile First ===== */
+* {
+  box-sizing: border-box;
+}
+
 body {
   background: #0f0f0f;
   color: #eaeaea;
-  font-family: Arial, sans-serif;
-  padding: 20px;
+  font-family: system-ui, -apple-system, Arial, sans-serif;
+  margin: 0;
+  padding: 16px;
 }
 
-.controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+h1, h2, h3 {
+  margin: 0 0 12px 0;
 }
 
-select, input, button {
-  padding: 6px;
+select,
+input,
+button {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
   background: #1e1e1e;
   color: #eaeaea;
   border: 1px solid #333;
+  border-radius: 4px;
 }
 
-.row {
-  margin: 6px 0;
-}
-
-#total {
-  margin-top: 15px;
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.tier-row {
+/* ===== Controls ===== */
+.controls {
   display: grid;
-  grid-template-columns: 1fr 160px;
-  margin-bottom: 6px;
-  font-weight: 500;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+/* ===== Materials Input ===== */
+#materials {
+  margin-top: 12px;
 }
 
 .material-row {
   display: grid;
-  grid-template-columns: 1fr 120px;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 8px;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
-.material-row input {
-  width: 100%;
-  padding: 4px;
+/* ===== Tier Output ===== */
+#total {
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.tier-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+/* ===== Buttons ===== */
+button {
+  cursor: pointer;
+}
+
+button:hover {
+  background: #262626;
+}
+
+/* ===== Desktop Enhancements ===== */
+@media (min-width: 600px) {
+  body {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  .controls {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .material-row {
+    grid-template-columns: 1fr 140px;
+    align-items: center;
+  }
+
+  .tier-row {
+    grid-template-columns: 1fr 180px;
+  }
+
+  select,
+  input,
+  button {
+    width: auto;
+  }
 }
