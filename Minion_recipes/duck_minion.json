@@ -1,0 +1,20 @@
+{
+    "name": "Duck Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Sword", "qty": 1 },
+            { "item": "Raw Duck", "qty": 64 }
+        ],
+        "2": [{ "item": "Raw Duck", "qty": 128 }],
+        "3": [{ "item": "Raw Duck", "qty": 256 }],
+        "4": [{ "item": "Raw Duck", "qty": 512 }],
+        "5": [{ "item": "Enchanted Raw Duck", "qty": 8 }],
+        "6": [{ "item": "Enchanted Raw Duck", "qty": 16 }],
+        "7": [{ "item": "Enchanted Raw Duck", "qty": 32 }],
+        "8": [{ "item": "Enchanted Raw Duck", "qty": 64 }],
+        "9": [{ "item": "Enchanted Raw Duck", "qty": 128 }],
+        "10": [{ "item": "Enchanted Raw Duck", "qty": 256 }],
+        "11": [{ "item": "Enchanted Raw Duck", "qty": 512 }]
+    }
+}
