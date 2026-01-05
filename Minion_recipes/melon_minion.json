@@ -1,0 +1,20 @@
+{
+    "name": "Melon Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Hoe", "qty": 1 },
+            { "item": "Melon", "qty": 256 }
+        ],
+        "2": [{ "item": "Melon", "qty": 512 }],
+        "3": [{ "item": "Melon Block", "qty": 128 }],
+        "4": [{ "item": "Melon Block", "qty": 256 }],
+        "5": [{ "item": "Melon Block", "qty": 512 }],
+        "6": [{ "item": "Enchanted Melon", "qty": 64 }],
+        "7": [{ "item": "Enchanted Melon", "qty": 128 }],
+        "8": [{ "item": "Enchanted Melon", "qty": 256 }],
+        "9": [{ "item": "Enchanted Melon", "qty": 512 }],
+        "10": [{ "item": "Enchanted Melon Block", "qty": 8 }],
+        "11": [{ "item": "Enchanted Melon Block", "qty": 16 }]
+    }
+}
