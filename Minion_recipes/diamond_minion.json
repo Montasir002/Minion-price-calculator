@@ -1,0 +1,20 @@
+{
+    "name": "Diamond Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Pickaxe", "qty": 1 },
+            { "item": "Diamond", "qty": 80 }
+        ],
+        "2": [{ "item": "Diamond", "qty": 160 }],
+        "3": [{ "item": "Diamond", "qty": 320 }],
+        "4": [{ "item": "Diamond", "qty": 512 }],
+        "5": [{ "item": "Enchanted Diamond", "qty": 8 }],
+        "6": [{ "item": "Enchanted Diamond", "qty": 24 }],
+        "7": [{ "item": "Enchanted Diamond", "qty": 64 }],
+        "8": [{ "item": "Enchanted Diamond", "qty": 128 }],
+        "9": [{ "item": "Enchanted Diamond", "qty": 256 }],
+        "10": [{ "item": "Enchanted Diamond", "qty": 512 }],
+        "11": [{ "item": "Enchanted Diamond Block", "qty": 8 }]
+    }
+}
