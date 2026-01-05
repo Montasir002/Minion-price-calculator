@@ -1,0 +1,20 @@
+{
+    "name": "Spider Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Sword", "qty": 1 },
+            { "item": "String", "qty": 80 }
+        ],
+        "2": [{ "item": "String", "qty": 160 }],
+        "3": [{ "item": "String", "qty": 320 }],
+        "4": [{ "item": "String", "qty": 512 }],
+        "5": [{ "item": "Enchanted String", "qty": 8 }],
+        "6": [{ "item": "Enchanted String", "qty": 16 }],
+        "7": [{ "item": "Enchanted String", "qty": 32 }],
+        "8": [{ "item": "Enchanted String", "qty": 64 }],
+        "9": [{ "item": "Enchanted String", "qty": 128 }],
+        "10": [{ "item": "Enchanted String", "qty": 256 }],
+        "11": [{ "item": "Enchanted String", "qty": 512 }]
+    }
+}
