@@ -1,11 +1,32 @@
 const LIB_BASE = "./Minion_recipes/";
 const minionCache = {};
+const itemImageMap = {};
+
+// DEFAULT ICON (used if url missing)
+const DEFAULT_ITEM_ICON =
+  "https://craftersmc.wiki.gg/images/thumb/Inventory_slot.png/16px-Inventory_slot.png";
 
 // DOM
 const minionSelect = document.getElementById("minionSelect");
 const materialsDiv = document.getElementById("materials");
 const totalDiv = document.getElementById("total");
 const loadBtn = document.getElementById("loadBtn");
+
+/* =========================
+   LOAD ITEM IMAGES
+========================= */
+fetch(LIB_BASE + "items.json")
+  .then(r => r.json())
+  .then(data => {
+    data.forEach(e => {
+      if (e.item) itemImageMap[e.item] = e.url;
+    });
+  })
+  .catch(() => console.warn("items.json not found, using default icons"));
+
+function getItemImage(itemName) {
+  return itemImageMap[itemName] || DEFAULT_ITEM_ICON;
+}
 
 /* =========================
    LOAD MINION LIST
@@ -54,14 +75,14 @@ function loadMinion() {
       for (let t = 1; t <= minion.max_tier; t++) {
         (minion.tiers[t] || []).forEach(m => {
           if (!m.item.includes("Minion") && !ignoreItems.includes(m.item)) {
-  materialSet.add(m.item);
-}
+            materialSet.add(m.item);
+          }
 
-// If Revenant Minion, also pull Zombie Minion materials
-if (isRevenant && m.item.includes("Zombie Minion")) {
-  materialSet.add("Rotten Flesh");
-  materialSet.add("Enchanted Rotten Flesh");
-}
+          // Revenant → Zombie dependency materials
+          if (isRevenant && m.item.includes("Zombie Minion")) {
+            materialSet.add("Rotten Flesh");
+            materialSet.add("Enchanted Rotten Flesh");
+          }
         });
       }
 
@@ -70,7 +91,10 @@ if (isRevenant && m.item.includes("Zombie Minion")) {
       materialSet.forEach(item => {
         materialsDiv.innerHTML += `
           <div class="material-row">
-            <span>${item} × 1</span>
+            <span class="item-label">
+              <img src="${getItemImage(item)}" class="item-icon">
+              ${item} × 1
+            </span>
             <input type="number" min="0" data-item="${item}">
           </div>
         `;
@@ -85,7 +109,7 @@ if (isRevenant && m.item.includes("Zombie Minion")) {
 }
 
 /* =========================
-   REVENANT DEPENDENCY
+   ZOMBIE MINION COST (REVENANT ONLY)
 ========================= */
 async function resolveZombieMinionCost(targetTier, prices) {
   const key = "zombie:" + targetTier;
