@@ -1,0 +1,20 @@
+{
+    "name": "Ice Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Pickaxe", "qty": 1 },
+            { "item": "Ice", "qty": 80 }
+        ],
+        "2": [{ "item": "Ice", "qty": 160 }],
+        "3": [{ "item": "Ice", "qty": 320 }],
+        "4": [{ "item": "Ice", "qty": 512 }],
+        "5": [{ "item": "Packed Ice", "qty": 128 }],
+        "6": [{ "item": "Packed Ice", "qty": 256 }],
+        "7": [{ "item": "Packed Ice", "qty": 512 }],
+        "8": [{ "item": "Enchanted Ice", "qty": 64 }],
+        "9": [{ "item": "Enchanted Ice", "qty": 128 }],
+        "10": [{ "item": "Enchanted Ice", "qty": 256 }],
+        "11": [{ "item": "Enchanted Ice", "qty": 512 }]
+    }
+}
