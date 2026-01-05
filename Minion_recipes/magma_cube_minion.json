@@ -1,0 +1,20 @@
+{
+    "name": "Magma Cube Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Sword", "qty": 1 },
+            { "item": "Magma Cream", "qty": 80 }
+        ],
+        "2": [{ "item": "Magma Cream", "qty": 160 }],
+        "3": [{ "item": "Magma Cream", "qty": 320 }],
+        "4": [{ "item": "Magma Cream", "qty": 512 }],
+        "5": [{ "item": "Enchanted Magma Cream", "qty": 8 }],
+        "6": [{ "item": "Enchanted Magma Cream", "qty": 16 }],
+        "7": [{ "item": "Enchanted Magma Cream", "qty": 32 }],
+        "8": [{ "item": "Enchanted Magma Cream", "qty": 64 }],
+        "9": [{ "item": "Enchanted Magma Cream", "qty": 128 }],
+        "10": [{ "item": "Enchanted Magma Cream", "qty": 256 }],
+        "11": [{ "item": "Enchanted Magma Cream", "qty": 512 }]
+    }
+}
