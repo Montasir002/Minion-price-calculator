@@ -1,0 +1,20 @@
+{
+    "name": "Gold Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Pickaxe", "qty": 1 },
+            { "item": "Gold Ingot", "qty": 80 }
+        ],
+        "2": [{ "item": "Gold Ingot", "qty": 160 }],
+        "3": [{ "item": "Gold Ingot", "qty": 320 }],
+        "4": [{ "item": "Gold Ingot", "qty": 512 }],
+        "5": [{ "item": "Enchanted Gold", "qty": 8 }],
+        "6": [{ "item": "Enchanted Gold", "qty": 24 }],
+        "7": [{ "item": "Enchanted Gold", "qty": 64 }],
+        "8": [{ "item": "Enchanted Gold", "qty": 128 }],
+        "9": [{ "item": "Enchanted Gold", "qty": 256 }],
+        "10": [{ "item": "Enchanted Gold", "qty": 512 }],
+        "11": [{ "item": "Enchanted Gold Block", "qty": 8 }]
+    }
+}
