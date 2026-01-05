@@ -1,0 +1,20 @@
+{
+    "name": "Mushroom Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Hoe", "qty": 1 },
+            { "item": "Mushroom", "qty": 80 }
+        ],
+        "2": [{ "item": "Mushroom", "qty": 160 }],
+        "3": [{ "item": "Mushroom", "qty": 320 }],
+        "4": [{ "item": "Mushroom", "qty": 512 }],
+        "5": [{ "item": "Enchanted Mushroom", "qty": 8 }],
+        "6": [{ "item": "Enchanted Mushroom", "qty": 16 }],
+        "7": [{ "item": "Enchanted Mushroom", "qty": 32 }],
+        "8": [{ "item": "Enchanted Mushroom", "qty": 64 }],
+        "9": [{ "item": "Enchanted Mushroom", "qty": 128 }],
+        "10": [{ "item": "Enchanted Mushroom", "qty": 256 }],
+        "11": [{ "item": "Enchanted Mushroom", "qty": 512 }]
+    }
+}
