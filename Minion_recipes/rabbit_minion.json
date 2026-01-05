@@ -1,0 +1,20 @@
+{
+    "name": "Rabbit Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Sword", "qty": 1 },
+            { "item": "Raw Rabbit", "qty": 64 }
+        ],
+        "2": [{ "item": "Raw Rabbit", "qty": 128 }],
+        "3": [{ "item": "Raw Rabbit", "qty": 256 }],
+        "4": [{ "item": "Raw Rabbit", "qty": 512 }],
+        "5": [{ "item": "Enchanted Rabbit Foot", "qty": 32 }],
+        "6": [{ "item": "Enchanted Rabbit Foot", "qty": 64 }],
+        "7": [{ "item": "Enchanted Rabbit Foot", "qty": 128 }],
+        "8": [{ "item": "Enchanted Rabbit Foot", "qty": 256 }],
+        "9": [{ "item": "Enchanted Rabbit Foot", "qty": 512 }],
+        "10": [{ "item": "Enchanted Rabbit Hide", "qty": 256 }],
+        "11": [{ "item": "Enchanted Rabbit Hide", "qty": 512 }]
+    }
+}
