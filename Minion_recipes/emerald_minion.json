@@ -1,0 +1,20 @@
+{
+    "name": "Emerald Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Pickaxe", "qty": 1 },
+            { "item": "Emerald", "qty": 80 }
+        ],
+        "2": [{ "item": "Emerald", "qty": 160 }],
+        "3": [{ "item": "Emerald", "qty": 320 }],
+        "4": [{ "item": "Emerald", "qty": 512 }],
+        "5": [{ "item": "Enchanted Emerald", "qty": 8 }],
+        "6": [{ "item": "Enchanted Emerald", "qty": 24 }],
+        "7": [{ "item": "Enchanted Emerald", "qty": 64 }],
+        "8": [{ "item": "Enchanted Emerald", "qty": 128 }],
+        "9": [{ "item": "Enchanted Emerald", "qty": 256 }],
+        "10": [{ "item": "Enchanted Emerald", "qty": 512 }],
+        "11": [{ "item": "Enchanted Emerald Block", "qty": 8 }]
+    }
+}
