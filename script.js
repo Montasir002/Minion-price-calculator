@@ -1,19 +1,21 @@
 const LIB_BASE = "./Minion_recipes/";
 const minionCache = {};
 
+// DOM
 const minionSelect = document.getElementById("minionSelect");
 const materialsDiv = document.getElementById("materials");
 const totalDiv = document.getElementById("total");
 const loadBtn = document.getElementById("loadBtn");
 
-// load minion list
+/* =========================
+   LOAD MINION LIST
+========================= */
 fetch(LIB_BASE + "index.json")
   .then(r => {
     if (!r.ok) throw new Error("Index JSON not found");
     return r.json();
   })
   .then(data => {
-    console.log("INDEX:", data);
     data.minions.forEach(m => {
       const opt = document.createElement("option");
       opt.value = m.file;
@@ -21,90 +23,74 @@ fetch(LIB_BASE + "index.json")
       minionSelect.appendChild(opt);
     });
   })
-  .catch(err => {
-    console.error(err);
-    alert("Failed to load minion list");
-  });
-
+  .catch(() => alert("Failed to load minion list"));
 
 loadBtn.onclick = loadMinion;
 
+/* =========================
+   LOAD SELECTED MINION
+========================= */
 function loadMinion() {
   if (!minionSelect.value) {
     alert("Please select a minion type");
     return;
   }
 
+  // reset cache
+  Object.keys(minionCache).forEach(k => delete minionCache[k]);
+
   materialsDiv.innerHTML = "Loading...";
   totalDiv.innerHTML = "";
 
-  // fetch ignore list (accept either an array or { ignore: [...] })
-  fetch(LIB_BASE + "ignore_list.json")
-    .then(r => {
-      if (!r.ok) throw new Error("Ignore list not found");
-      return r.json();
-    })
-    .then(ignoreData => {
-      const list = Array.isArray(ignoreData) ? ignoreData : (ignoreData.ignore || []);
-      const ignoreItems = list.map(i => i.item); // array of items to ignore
+  Promise.all([
+    fetch(LIB_BASE + "ignore_list.json").then(r => r.json()),
+    fetch(LIB_BASE + minionSelect.value).then(r => r.json())
+  ])
+    .then(([ignoreData, minion]) => {
+      const ignoreItems = (ignoreData.ignore || ignoreData || []).map(i => i.item);
+      const materialSet = new Set();
 
-      // fetch selected minion
-      return fetch(LIB_BASE + minionSelect.value)
-        .then(r => {
-          if (!r.ok) throw new Error("Minion file not found");
-          return r.json();
-        })
-        .then(minion => {
-          const materialSet = new Set();
-
-          for (let t = 1; t <= minion.max_tier; t++) {
-            (minion.tiers[t] || []).forEach(m => {
-              if (!ignoreItems.includes(m.item)) { // check ignore list
-                materialSet.add(m.item);
-              }
-            });
+      for (let t = 1; t <= minion.max_tier; t++) {
+        (minion.tiers[t] || []).forEach(m => {
+          if (!m.item.includes("Minion") && !ignoreItems.includes(m.item)) {
+            materialSet.add(m.item);
           }
-
-          materialsDiv.innerHTML = "<b>Enter Bazar Prices of these items-</b><br>";
-          materialSet.forEach(item => {
-            materialsDiv.innerHTML += `\n<div class="material-row">\n  <span>${item} × 1</span>\n  <input type="number" min="0" data-item="${item}">\n</div>\n`;
-          });
-
-          const btn = document.createElement("button");
-          btn.textContent = "Calculate Tier Prices";
-          btn.onclick = () => calculateTierPrices(minion);
-          materialsDiv.appendChild(btn);
         });
+      }
+
+      materialsDiv.innerHTML = "<b>Enter Bazar Prices</b>";
+
+      materialSet.forEach(item => {
+        materialsDiv.innerHTML += `
+          <div class="material-row">
+            <span>${item} × 1</span>
+            <input type="number" min="0" data-item="${item}">
+          </div>
+        `;
+      });
+
+      const btn = document.createElement("button");
+      btn.textContent = "Calculate Tier Prices";
+      btn.onclick = () => calculateTierPrices(minion);
+      materialsDiv.appendChild(btn);
     })
-    .catch(err => {
-      console.error(err);
-      alert("Failed to load ignore list or minion data");
-    });
+    .catch(() => alert("Failed to load minion data"));
 }
 
-async function resolveMinionCost(minionFile, targetTier, prices) {
-  const key = minionFile + ":" + targetTier;
+/* =========================
+   REVENANT DEPENDENCY
+========================= */
+async function resolveZombieMinionCost(targetTier, prices) {
+  const key = "zombie:" + targetTier;
   if (minionCache[key]) return minionCache[key];
 
-  const res = await fetch(LIB_BASE + minionFile);
-  const minion = await res.json();
+  const res = await fetch(LIB_BASE + "zombie_minion.json");
+  const zombie = await res.json();
 
   let total = 0;
-
   for (let t = 1; t <= targetTier; t++) {
-    for (const mat of minion.tiers[t] || []) {
-      if (mat.item.includes("Minion")) {
-        // e.g. "Zombie Minion V"
-        const [baseName, tierRoman] =
-          mat.item.replace(" Minion", "").split(" ");
-        const depTier = romanToNumber(tierRoman);
-        const depFile =
-          baseName.toLowerCase().replace(/ /g, "_") + "_minion.json";
-
-        total += await resolveMinionCost(depFile, depTier, prices);
-      } else {
-        total += (prices[mat.item] || 0) * mat.qty;
-      }
+    for (const m of zombie.tiers[t] || []) {
+      total += (prices[m.item] || 0) * m.qty;
     }
   }
 
@@ -112,39 +98,39 @@ async function resolveMinionCost(minionFile, targetTier, prices) {
   return total;
 }
 
+/* =========================
+   ROMAN NUMBERS
+========================= */
 function romanToNumber(r) {
-  const map = {
+  return {
     I:1, II:2, III:3, IV:4, V:5,
     VI:6, VII:7, VIII:8, IX:9, X:10
-  };
-  return map[r];
+  }[r];
 }
 
+/* =========================
+   MAIN CALCULATION
+========================= */
 async function calculateTierPrices(minion) {
-  // read user-entered prices
   const prices = {};
   document.querySelectorAll("#materials input").forEach(i => {
     prices[i.dataset.item] = Number(i.value || 0);
   });
 
+  const hasZombieDependency = minion.name === "Revenant Minion";
+
   let runningTotal = 0;
-  totalDiv.innerHTML = "<b>Craft Cost Per Tier</b><br>";
+  totalDiv.innerHTML = "<b>Craft Cost Per Tier</b>";
 
   for (let t = 1; t <= minion.max_tier; t++) {
     let tierCost = 0;
 
     for (const m of minion.tiers[t] || []) {
-      if (m.item.includes("Minion")) {
-        // dependency minion (e.g. Zombie Minion V)
-        const parts = m.item.replace(" Minion", "").split(" ");
-        const depTier = romanToNumber(parts.pop());
-        const depName = parts.join(" ");
-        const depFile =
-          depName.toLowerCase().replace(/ /g, "_") + "_minion.json";
-
-        tierCost += await resolveMinionCost(depFile, depTier, prices);
+      if (hasZombieDependency && m.item.includes("Zombie Minion")) {
+        const tierRoman = m.item.split(" ").pop();
+        const zombieTier = romanToNumber(tierRoman);
+        tierCost += await resolveZombieMinionCost(zombieTier, prices);
       } else {
-        // normal material
         tierCost += (prices[m.item] || 0) * m.qty;
       }
     }
