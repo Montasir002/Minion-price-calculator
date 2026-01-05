@@ -1,0 +1,20 @@
+{
+    "name": "Redstone Minion",
+    "max_tier": 11,
+    "tiers": {
+        "1": [
+            { "item": "Wooden Pickaxe", "qty": 1 },
+            { "item": "Redstone Dust", "qty": 128 }
+        ],
+        "2": [{ "item": "Redstone Dust", "qty": 256 }],
+        "3": [{ "item": "Redstone Dust", "qty": 512 }],
+        "4": [{ "item": "Enchanted Redstone Dust", "qty": 8 }],
+        "5": [{ "item": "Enchanted Redstone Dust", "qty": 24 }],
+        "6": [{ "item": "Enchanted Redstone Dust", "qty": 64 }],
+        "7": [{ "item": "Enchanted Redstone Dust", "qty": 128 }],
+        "8": [{ "item": "Enchanted Redstone Dust", "qty": 256 }],
+        "9": [{ "item": "Enchanted Redstone Dust", "qty": 512 }],
+        "10": [{ "item": "Enchanted Redstone Block", "qty": 8 }],
+        "11": [{ "item": "Enchanted Redstone Block", "qty": 16 }]
+    }
+}
