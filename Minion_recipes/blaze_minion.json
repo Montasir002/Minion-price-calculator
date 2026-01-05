@@ -3,7 +3,7 @@
   "max_tier": 11,
   "tiers": {
     "1": [
-      { "item": "Wooden Sword", "qty": 1 },
+      { "item": "Bow", "qty": 1 },
       { "item": "Blaze Rod", "qty": 80 }
     ],
     "2": [{ "item": "Blaze Rod", "qty": 160 }],
