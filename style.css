@@ -87,12 +87,9 @@ button:hover {
   }
 
   .tier-row {
-    grid-template-columns: 1fr 180px;
-  }
-
-  select,
-  input,
-  button {
-    width: auto;
-  }
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-weight: 500;
 }
