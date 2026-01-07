@@ -1,7 +1,7 @@
 const LIB_BASE = "./Minion_recipes/";
 const minionCache = {};
 const itemImageMap = {};
-const DEFAULT_ITEM_ICON = "https://craftersmc.wiki.gg/images/thumb/Inventory_slot.png/16px-Inventory_slot.png";
+const DEFAULT_ITEM_ICON = "https://craftersmc.net/data/assets/logo/newOriginal512.png";
 
 const minionSelect = document.getElementById("minionSelect");
 const materialsDiv = document.getElementById("materials");
