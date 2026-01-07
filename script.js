@@ -45,7 +45,7 @@ function loadMinion() {
       });
     }
 
-    materialsDiv.innerHTML = "<h3>Bazaar Prices</h3>";
+    materialsDiv.innerHTML = "<h3>Enter Bazaar Prices</h3>";
     materialSet.forEach(item => {
       materialsDiv.innerHTML += `
         <div class="material-row">
