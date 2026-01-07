@@ -5,21 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Minion Price Calculator</title>
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="dark-mode">
 
-<h1>Minion Price Calculator</h1>
+  <button id="modeToggle" class="theme-btn">🌙 Toggle Mode</button>
 
-<div class="controls">
-  <select id="minionSelect">
-  <option value="" disabled selected>Select Minion type</option>
-</select>
-  <button id="loadBtn">Load</button>
-</div>
+  <div class="app-container">
+    <header>
+      <h1>Minion Price Calculator</h1>
+      <p>Calculate exact crafting costs for Skyblock progression</p>
+    </header>
 
-<div id="materials"></div>
-<div id="total"></div>
+    <div class="card">
+      <div class="controls">
+        <select id="minionSelect">
+          <option value="" disabled selected>Select Minion type</option>
+        </select>
+        <button id="loadBtn" class="primary-btn">Load Minion</button>
+      </div>
+    </div>
 
-<script src="script.js"></script>
+    <div class="main-grid">
+      <section id="materials" class="card"></section>
+      <section id="total" class="card"></section>
+    </div>
+
+    <footer>
+      <p>Made by <strong>Montasir02</strong></p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
