@@ -1,3 +1,6 @@
+/* =========================
+   THEME VARIABLES
+========================= */
 :root {
   --bg-color: #f8fafc;
   --card-bg: #ffffff;
@@ -18,29 +21,59 @@
   --input-bg: #0f172a;
 }
 
-* { box-sizing: border-box; transition: background 0.2s, color 0.2s; }
+/* =========================
+   GLOBAL RESET
+========================= */
+* {
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
 
 body {
+  margin: 0;
+  padding: 20px;
   background: var(--bg-color);
   color: var(--text-primary);
   font-family: 'Inter', sans-serif;
-  margin: 0;
-  padding: 20px;
   display: flex;
   justify-content: center;
 }
 
-.app-container { width: 100%; max-width: 1000px; }
+/* =========================
+   APP LAYOUT
+========================= */
+.app-container {
+  width: 100%;
+  max-width: 1000px;
+}
 
-header { text-align: center; margin-bottom: 30px; }
-header h1 { color: var(--accent); margin: 0; font-size: 2.2rem; }
+/* =========================
+   HEADER
+========================= */
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
 
+header h1 {
+  margin: 0;
+  font-size: 2.2rem;
+  color: var(--accent);
+}
+
+header p {
+  color: var(--text-secondary);
+}
+
+/* =========================
+   THEME TOGGLE BUTTON
+========================= */
 .theme-btn {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 8px 16px;
-  border-radius: 20px;
+  top: 16px;
+  right: 16px;
+  padding: 8px 14px;
+  border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--card-bg);
   color: var(--text-primary);
@@ -48,43 +81,62 @@ header h1 { color: var(--accent); margin: 0; font-size: 2.2rem; }
   z-index: 100;
 }
 
+/* =========================
+   CARD
+========================= */
 .card {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
 }
 
-.controls { display: flex; gap: 10px; }
+/* =========================
+   CONTROLS
+========================= */
+.controls {
+  display: flex;
+  width: 100%;
+}
 
-select, input {
+select {
+  width: 100%;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--input-bg);
   color: var(--text-primary);
 }
 
+/* =========================
+   BUTTONS
+========================= */
 .primary-btn {
+  width: 100%;
+  margin-top: 16px;
   background: var(--accent);
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
+  padding: 12px;
+  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
 }
 
-/* Fix for Material Rows Alignment */
+/* =========================
+   MATERIAL LIST
+========================= */
 .material-row {
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
 }
 
-/* ICON */
+/* Item Icon */
 .material-row img.item-icon {
   width: 24px;
   height: 24px;
@@ -92,32 +144,37 @@ select, input {
   image-rendering: pixelated;
 }
 
-/* NAME */
+/* Item Name */
 .material-row span {
   flex: 1;
   min-width: 0;
   word-break: break-word;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
-/* INPUT */
+/* Price Input */
 .material-row input {
   width: 90px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text-primary);
   flex-shrink: 0;
-  margin-left: auto; /* 🔥 THIS is the key line */
+  margin-left: auto;
 }
 
-.item-icon { width: 24px; height: 24px; image-rendering: pixelated; margin-right: 8px; vertical-align: middle; }
-
-/* FIX FOR TIER ROWS ALIGNMENT */
+/* =========================
+   TIER RESULT LIST
+========================= */
 .tier-row {
   display: flex;
-  justify-content: space-between; /* Pushes content to far left and far right */
+  justify-content: space-between;
   align-items: center;
   padding: 12px;
+  margin-top: 10px;
   background: var(--bg-color);
-  margin-top: 8px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--border);
 }
 
@@ -126,14 +183,46 @@ select, input {
   color: var(--accent);
 }
 
-footer { text-align: center; margin-top: 40px; color: var(--text-secondary); }
-
+/* =========================
+   GRID (DESKTOP)
+========================= */
 @media (min-width: 768px) {
-  .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
 }
 
+/* =========================
+   MOBILE TWEAKS
+========================= */
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.9rem;
+  }
+
+  .material-row input {
+    width: 80px;
+  }
+
+  .material-row span {
+    font-size: 0.95rem;
+  }
+}
+
+/* =========================
+   FOOTER
+========================= */
+footer {
+  text-align: center;
+  margin-top: 40px;
+  color: var(--text-secondary);
+}
+
+/* Discord link */
 .discord-link {
-  color: #7289da; /* Discord blurple */
+  color: #7289da;
   text-decoration: none;
 }
 
