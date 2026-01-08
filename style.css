@@ -80,10 +80,31 @@ select, input {
 /* Fix for Material Rows Alignment */
 .material-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
+  gap: 12px;
+}
+
+/* ICON */
+.material-row img.item-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+
+/* NAME */
+.material-row span {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+  line-height: 1.2;
+}
+
+/* INPUT */
+.material-row input {
+  width: 90px;
+  flex-shrink: 0;
+  margin-left: auto; /* 🔥 THIS is the key line */
 }
 
 .item-icon { width: 24px; height: 24px; image-rendering: pixelated; margin-right: 8px; vertical-align: middle; }
