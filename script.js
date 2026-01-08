@@ -89,5 +89,5 @@ async function calculateTierPrices(minion) {
 // Dark Mode Toggle
 modeToggle.onclick = () => {
   document.body.classList.toggle("dark-mode");
-  modeToggle.textContent = document.body.classList.contains("dark-mode") ? "☀️ Light Mode" : "🌙 Dark Mode";
+  modeToggle.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
 };
