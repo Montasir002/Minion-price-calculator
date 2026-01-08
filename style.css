@@ -37,7 +37,7 @@ header h1 { color: var(--accent); margin: 0; font-size: 2.2rem; }
 
 .theme-btn {
   position: fixed;
-  bottom: 20px;
+  top: 20px;
   right: 20px;
   padding: 8px 16px;
   border-radius: 20px;
