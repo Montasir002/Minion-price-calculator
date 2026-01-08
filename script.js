@@ -6,7 +6,6 @@ const DEFAULT_ITEM_ICON = "https://craftersmc.net/data/assets/logo/newOriginal51
 const minionSelect = document.getElementById("minionSelect");
 const materialsDiv = document.getElementById("materials");
 const totalDiv = document.getElementById("total");
-const loadBtn = document.getElementById("loadBtn");
 const modeToggle = document.getElementById("modeToggle");
 
 // Load images
@@ -25,7 +24,7 @@ fetch(LIB_BASE + "index.json").then(r => r.json()).then(data => {
   });
 });
 
-loadBtn.onclick = loadMinion;
+minionSelect.addEventListener("change", loadMinion);
 
 function loadMinion() {
   if (!minionSelect.value) return alert("Select a minion");
