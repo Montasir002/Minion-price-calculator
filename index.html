@@ -54,11 +54,19 @@
   const db = getFirestore(app);
 
   window.loadPricesFromFirebase = async function () {
-  const snap = await getDoc(doc(db, "prices", "items")); // Collection: prices, Doc: items
-  return snap.exists() ? snap.data() : {};
-};
+    try {
+      const snap = await getDoc(doc(db, "prices", "items"));
+      return snap.exists() ? snap.data() : {};
+    } catch (e) {
+      console.error("Firebase Read Error:", e);
+      return {};
+    }
+  };
 
+  // Signal that Firebase is ready
+  window.firebaseRemoteReady = true;
 </script>
+
   <script src="script.js"></script>
   <script data-goatcounter="https://montasir02.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
