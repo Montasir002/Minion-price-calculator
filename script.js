@@ -7,19 +7,18 @@ const materialsDiv = document.getElementById("materials");
 const totalDiv = document.getElementById("total");
 const modeToggle = document.getElementById("modeToggle");
 
-// Create the Load Button
-const loadBtn = document.createElement("button");
-loadBtn.id = "loadMinionBtn";
-loadBtn.className = "primary-btn";
-loadBtn.style.width = "100%";
-loadBtn.style.marginTop = "10px";
-loadBtn.textContent = "Syncing with Database...";
-loadBtn.disabled = true; // Disabled by default
-minionSelect.parentElement.appendChild(loadBtn);
+// Initial state: Disable the dropdown
+minionSelect.disabled = true;
+const defaultOption = minionSelect.options[0];
+defaultOption.textContent = "Syncing with Bazaar... ⏳";
 
 let firebasePrices = {};
 let isPricesLoaded = false;
 
+/**
+ * 1. Initialize Data
+ * Polls for Firebase and fetches all necessary data
+ */
 async function initializeData() {
     const awaitFirebase = () => {
         return new Promise((resolve) => {
@@ -36,23 +35,28 @@ async function initializeData() {
 
     try {
         await awaitFirebase();
+        
         const [itemData, prices] = await Promise.all([
             fetch(LIB_BASE + "items.json").then(r => r.json()),
             window.loadPricesFromFirebase()
         ]);
 
+        // Map icons
         itemData.forEach(e => { if (e.item) itemImageMap[e.item] = e.url; });
+        
+        // Load prices
         firebasePrices = prices || {};
         isPricesLoaded = true;
 
-        // Enable button once data is in memory
-        loadBtn.textContent = "Load Minion Data";
-        loadBtn.disabled = false;
-        console.log("Database Ready");
+        // UNLOCK UI: Enable the dropdown
+        minionSelect.disabled = false;
+        defaultOption.textContent = "Select Minion type";
+        console.log("Database Sync Complete.");
     } catch (err) {
         console.error("Initialization failed:", err);
-        loadBtn.textContent = "Offline Mode (Manual Prices)";
-        loadBtn.disabled = false;
+        // Fallback: Unlock anyway so they can enter manual prices
+        minionSelect.disabled = false;
+        defaultOption.textContent = "Select Minion (Offline Mode)";
     }
 }
 
@@ -60,7 +64,7 @@ initializeData();
 
 function getItemImage(itemName) { return itemImageMap[itemName] || DEFAULT_ITEM_ICON; }
 
-// Load Minion List into dropdown
+// Load Minion List
 fetch(LIB_BASE + "index.json").then(r => r.json()).then(data => {
     data.minions.forEach(m => {
         const opt = document.createElement("option");
@@ -69,8 +73,8 @@ fetch(LIB_BASE + "index.json").then(r => r.json()).then(data => {
     });
 });
 
-// Trigger load only on button click
-loadBtn.addEventListener("click", loadMinion);
+// Load minion data automatically when the selection changes
+minionSelect.addEventListener("change", loadMinion);
 
 function loadMinion() {
     if (!minionSelect.value) return;
@@ -93,13 +97,13 @@ function loadMinion() {
 
         materialsDiv.innerHTML = "<h3>Enter Bazaar Prices</h3>";
         materialSet.forEach(item => {
-            // Match exactly or with underscores
+            // Priority: Exact Match -> Underscore Match -> 0
             const price = firebasePrices[item] ?? firebasePrices[item.replace(/ /g, "_")] ?? 0;
 
             materialsDiv.innerHTML += `
                 <div class="material-row" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
                     <span style="display:flex; align-items:center;">
-                        <img src="${getItemImage(item)}" class="item-icon" style="width:24px; height:24px; margin-right:10px;">
+                        <img src="${getItemImage(item)}" class="item-icon" style="width:24px; height:24px; margin-right:10px; image-rendering:pixelated;">
                         ${item}
                     </span>
                     <input type="number" min="0" data-item="${item}" value="${price}" placeholder="0" style="width:80px;">
@@ -117,8 +121,10 @@ function loadMinion() {
 }
 
 async function calculateTierPrices(minion) {
-    const prices = {};
-    document.querySelectorAll("#materials input").forEach(i => { prices[i.dataset.item] = Number(i.value || 0); });
+    const currentPrices = {};
+    document.querySelectorAll("#materials input").forEach(i => { 
+        currentPrices[i.dataset.item] = Number(i.value || 0); 
+    });
 
     let runningTotal = 0;
     totalDiv.innerHTML = "<h3>Craft Cost Per Tier</h3>";
@@ -126,7 +132,7 @@ async function calculateTierPrices(minion) {
     for (let t = 1; t <= minion.max_tier; t++) {
         let tierCost = 0;
         for (const m of minion.tiers[t] || []) {
-            tierCost += (prices[m.item] || 0) * m.qty;
+            tierCost += (currentPrices[m.item] || 0) * m.qty;
         }
         runningTotal += tierCost;
 
