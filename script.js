@@ -133,33 +133,17 @@ modeToggle.onclick = () => {
     modeToggle.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
 };
 
-// Banner Logic
+// --- Banner Logic ---
 const helpBanner = document.getElementById("helpBanner");
 const closeBanner = document.getElementById("closeBanner");
+
 if (localStorage.getItem("hideBazaarBanner") === "true") {
     if (helpBanner) helpBanner.classList.add("hidden");
 }
+
 if (closeBanner) {
     closeBanner.onclick = () => {
-        helpBanner.classList.add("hidden");
-        localStorage.setItem("hideBazaarBanner", "true");
-    };
-}
-
-// --- Banner Dismiss Logic (Corrected) ---
-const helpBanner = document.getElementById("helpBanner");
-const closeBanner = document.getElementById("closeBanner");
-
-// Check if user previously hid it on page load
-if (localStorage.getItem("hideBazaarBanner") === "true") {
-    if (helpBanner) helpBanner.classList.add("hidden");
-}
-
-// Close button functionality
-if (closeBanner && helpBanner) {
-    closeBanner.onclick = () => {
-        helpBanner.classList.add("hidden");
-        // Save the hidden state so it stays hidden after refresh
+        if (helpBanner) helpBanner.classList.add("hidden");
         localStorage.setItem("hideBazaarBanner", "true");
     };
 }
