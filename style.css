@@ -96,7 +96,7 @@ select {
   border: 1px solid var(--border);
   background: var(--input-bg);
   color: var(--text-primary);
-  text-align: right;
+  text-align: center;
 }
 
 .tier-row {
