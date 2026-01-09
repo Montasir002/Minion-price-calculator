@@ -1,112 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bazaar Admin - Edit Prices</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        .admin-card { max-width: 600px; margin: 40px auto; padding: 25px; }
-        .item-list { margin-top: 20px; max-height: 60vh; overflow-y: auto; padding-right: 10px; }
-        .admin-row { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 10px 0; border-bottom: 1px solid #444; 
-        }
-        .admin-row label { font-weight: 600; color: #eee; }
-        .admin-row input { 
-            width: 100px; padding: 8px; border-radius: 4px; 
-            border: 1px solid #555; background: #222; color: white;
-        }
-        .save-section { margin-top: 20px; text-align: center; }
-        #statusMsg { margin-top: 10px; font-weight: bold; }
-    </style>
+  <meta charset="UTF-8">
+  <title>Secure Bazaar Admin</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin-card { max-width: 600px; margin: 40px auto; padding: 25px; }
+    .hidden { display: none !important; }
+    .search-box { width: 100%; padding: 12px; margin: 15px 0; border-radius: 8px; background: #1a1a1a; color: white; border: 1px solid #555; }
+    .item-list { max-height: 50vh; overflow-y: auto; }
+    .admin-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #333; }
+    .admin-row input { width: 80px; background: #000; color: #00ff00; border: 1px solid #444; text-align: right; }
+  </style>
 </head>
 <body class="dark-mode">
 
-    <div class="admin-card card">
-        <h1>Admin Dashboard</h1>
-        <p>Update prices in the Firestore database.</p>
-        
-        <div id="itemList" class="item-list">
-            <p>Loading items from Firebase...</p>
-        </div>
+  <div id="loginScreen" class="admin-card card">
+    <h1>Admin Login</h1>
+    <input type="email" id="email" placeholder="Email" style="width:100%; margin-bottom:10px; padding:10px;">
+    <input type="password" id="password" placeholder="Password" style="width:100%; margin-bottom:10px; padding:10px;">
+    <button id="loginBtn" class="primary-btn" style="width:100%;">Login</button>
+    <p id="loginError" style="color:red;"></p>
+  </div>
 
-        <div class="save-section">
-            <button id="saveBtn" class="primary-btn" style="width: 100%;">Update All Prices</button>
-            <div id="statusMsg"></div>
-        </div>
-        
-        <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.6;">
-            Note: This updates the "prices/items" document.
-        </div>
+  <div id="adminDashboard" class="admin-card card hidden">
+    <div style="display:flex; justify-content:space-between;">
+        <h1>Bazaar Admin</h1>
+        <button id="logoutBtn" style="background:none; color:grey; border:none; cursor:pointer;">Logout</button>
     </div>
+    
+    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search items...">
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <div id="itemList" class="item-list"></div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDy-AQZOGLc65rCIZAHlrdHes4VTvw6QmY",
-            authDomain: "craftersmc-bazar.firebaseapp.com",
-            projectId: "craftersmc-bazar",
-        };
+    <div style="margin-top:20px; position:sticky; bottom:0; background:#111; padding:10px;">
+      <button id="saveBtn" class="primary-btn" style="width: 100%;">Save Changes</button>
+      <div id="statusMsg" style="text-align:center; margin-top:10px;"></div>
+    </div>
+  </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const docRef = doc(db, "prices", "items");
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        const itemListDiv = document.getElementById('itemList');
-        const statusMsg = document.getElementById('statusMsg');
+    const firebaseConfig = {
+      apiKey: "AIzaSyDy-AQZOGLc65rCIZAHlrdHes4VTvw6QmY",
+      authDomain: "craftersmc-bazar.firebaseapp.com",
+      projectId: "craftersmc-bazar",
+    };
 
-        // 1. Load data from Firebase
-        async function loadPrices() {
-            try {
-                const snap = await getDoc(docRef);
-                if (snap.exists()) {
-                    const data = snap.data();
-                    itemListDiv.innerHTML = "";
-                    
-                    // Sort items alphabetically
-                    const sortedKeys = Object.keys(data).sort();
-                    
-                    sortedKeys.forEach(itemName => {
-                        itemListDiv.innerHTML += `
-                            <div class="admin-row">
-                                <label>${itemName}</label>
-                                <input type="number" class="price-input" data-name="${itemName}" value="${data[itemName]}">
-                            </div>`;
-                    });
-                } else {
-                    itemListDiv.innerHTML = "No document found at prices/items";
-                }
-            } catch (err) {
-                itemListDiv.innerHTML = "Error loading data: " + err.message;
-            }
-        }
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const docRef = doc(db, "prices", "items");
 
-        // 2. Save data back to Firebase
-        document.getElementById('saveBtn').onclick = async () => {
-            statusMsg.textContent = "Saving...";
-            statusMsg.style.color = "orange";
-            
-            const updatedData = {};
-            document.querySelectorAll('.price-input').forEach(input => {
-                updatedData[input.dataset.name] = Number(input.value);
-            });
-
-            try {
-                await setDoc(docRef, updatedData);
-                statusMsg.textContent = "✅ Prices updated successfully!";
-                statusMsg.style.color = "#00ff00";
-                setTimeout(() => { statusMsg.textContent = ""; }, 3000);
-            } catch (err) {
-                console.error(err);
-                statusMsg.textContent = "❌ Error saving: Check your Firebase Rules.";
-                statusMsg.style.color = "#ff4444";
-            }
-        };
-
+    // --- Auth Observer ---
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginScreen.classList.add('hidden');
+        adminDashboard.classList.remove('hidden');
         loadPrices();
-    </script>
+      } else {
+        loginScreen.classList.remove('hidden');
+        adminDashboard.classList.add('hidden');
+      }
+    });
+
+    // --- Login ---
+    document.getElementById('loginBtn').onclick = async () => {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (err) {
+        document.getElementById('loginError').textContent = "Login Failed: " + err.message;
+      }
+    };
+
+    // --- Logout ---
+    document.getElementById('logoutBtn').onclick = () => signOut(auth);
+
+    // --- Load/Render ---
+    let cachedData = {};
+    async function loadPrices() {
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        cachedData = snap.data();
+        renderList();
+      }
+    }
+
+    function renderList() {
+      const term = document.getElementById('searchInput').value.toLowerCase();
+      const list = document.getElementById('itemList');
+      list.innerHTML = "";
+      Object.keys(cachedData).sort().forEach(key => {
+        if (key.toLowerCase().includes(term)) {
+          const row = document.createElement('div');
+          row.className = "admin-row";
+          row.innerHTML = `<label>${key}</label>
+                           <input type="number" value="${cachedData[key]}" onchange="window.updateCache('${key}', this.value)">`;
+          list.appendChild(row);
+        }
+      });
+    }
+
+    window.updateCache = (key, val) => { cachedData[key] = Number(val); };
+    document.getElementById('searchInput').oninput = renderList;
+
+    // --- Save ---
+    document.getElementById('saveBtn').onclick = async () => {
+      const msg = document.getElementById('statusMsg');
+      msg.textContent = "Saving...";
+      try {
+        await setDoc(docRef, cachedData);
+        msg.textContent = "✅ Saved Successfully!";
+        msg.style.color = "#00ff00";
+      } catch (err) {
+        msg.textContent = "❌ Permission Denied (Check Rules)";
+        msg.style.color = "red";
+      }
+    };
+  </script>
 </body>
 </html>
