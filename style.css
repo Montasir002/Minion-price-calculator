@@ -1,6 +1,3 @@
-/* =========================
-   THEME VARIABLES
-========================= */
 :root {
   --bg-color: #f8fafc;
   --card-bg: #ffffff;
@@ -21,256 +18,93 @@
   --input-bg: #0f172a;
 }
 
-/* =========================
-   GLOBAL RESET
-========================= */
-* {
-  box-sizing: border-box;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
+* { box-sizing: border-box; }
 
 body {
-  margin: 0;
-  padding: 20px;
+  margin: 0; padding: 20px;
   background: var(--bg-color);
   color: var(--text-primary);
   font-family: 'Inter', sans-serif;
-  display: flex;
-  justify-content: center;
+  display: flex; justify-content: center;
 }
 
-/* =========================
-   APP LAYOUT
-========================= */
-.app-container {
-  width: 100%;
-  max-width: 1000px;
-}
+.app-container { width: 100%; max-width: 1000px; }
 
-/* =========================
-   HEADER
-========================= */
-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
+header { text-align: center; margin-bottom: 30px; }
+header h1 { margin: 0; font-size: 2.2rem; color: var(--accent); }
 
-header h1 {
-  margin: 0;
-  font-size: 2.2rem;
-  color: var(--accent);
-}
-
-header p {
-  color: var(--text-secondary);
-}
-
-/* =========================
-   THEME TOGGLE BUTTON
-========================= */
 .theme-btn {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  padding: 8px 14px;
-  border-radius: 999px;
+  position: fixed; top: 16px; right: 16px;
+  padding: 8px 14px; border-radius: 999px;
   border: 1px solid var(--border);
-  background: var(--card-bg);
-  color: var(--text-primary);
-  cursor: pointer;
-  z-index: 100;
+  background: var(--card-bg); color: var(--text-primary);
+  cursor: pointer; z-index: 100;
 }
 
-/* =========================
-   CARD
-========================= */
 .card {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 20px;
+  border-radius: 14px; padding: 20px;
   margin-bottom: 20px;
   box-shadow: 0 6px 12px rgba(0,0,0,0.08);
 }
 
-/* =========================
-   CONTROLS
-========================= */
-.controls {
-  display: flex;
-  width: 100%;
-}
-
-select {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
+select, input {
+  padding: 12px; border-radius: 10px;
   border: 1px solid var(--border);
-  background: var(--input-bg);
-  color: var(--text-primary);
+  background: var(--input-bg); color: var(--text-primary);
 }
 
-/* =========================
-   BUTTONS
-========================= */
+select { width: 100%; }
+
 .primary-btn {
-  width: 100%;
-  margin-top: 16px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  padding: 12px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
+  width: 100%; margin-top: 16px;
+  background: var(--accent); color: white;
+  border: none; padding: 12px;
+  border-radius: 10px; font-weight: 600; cursor: pointer;
 }
 
-/* =========================
-   MATERIAL LIST
-========================= */
 .material-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
 }
 
-/* Item Icon */
-.material-row img.item-icon {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
-  image-rendering: pixelated;
-}
+.item-icon { width: 24px; height: 24px; vertical-align: middle; margin-right: 8px; }
 
-/* Item Name */
-.material-row span {
-  flex: 1;
-  min-width: 0;
-  word-break: break-word;
-  line-height: 1.25;
-}
-
-/* Price Input */
-.material-row input {
-  width: 90px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--input-bg);
-  color: var(--text-primary);
-  flex-shrink: 0;
-  margin-left: auto;
-}
-
-/* =========================
-   TIER RESULT LIST
-========================= */
 .tier-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  margin-top: 10px;
-  background: var(--bg-color);
-  border-radius: 10px;
+  display: flex; justify-content: space-between;
+  padding: 12px; margin-top: 10px;
+  background: var(--bg-color); border-radius: 10px;
   border: 1px solid var(--border);
 }
 
-.tier-price {
-  font-weight: 700;
-  color: var(--accent);
-}
+.tier-price { font-weight: 700; color: #00ff00; }
 
-/* =========================
-   GRID (DESKTOP)
-========================= */
 @media (min-width: 768px) {
-  .main-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
+  .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 }
 
-/* =========================
-   MOBILE TWEAKS
-========================= */
-@media (max-width: 480px) {
-  header h1 {
-    font-size: 1.9rem;
-  }
+footer { text-align: center; margin-top: 40px; color: var(--text-secondary); }
+.discord-link { color: #7289da; text-decoration: none; }
 
-  .material-row input {
-    width: 80px;
-  }
-
-  .material-row span {
-    font-size: 0.95rem;
-  }
-}
-
-/* =========================
-   FOOTER
-========================= */
-footer {
-  text-align: center;
-  margin-top: 40px;
-  color: var(--text-secondary);
-}
-
-/* Discord link */
-.discord-link {
-  color: #7289da;
-  text-decoration: none;
-}
-
-.discord-link:hover {
-  text-decoration: underline;
-}
-
-
-/* Recruitment Banner Styles */
+/* Recruitment Banner */
 .banner {
-  background: linear-gradient(90deg, #3b82f6, #2563eb) !important; /* Blue gradient */
+  background: linear-gradient(90deg, #3b82f6, #2563eb) !important;
   color: white !important;
-  padding: 12px 20px !important;
-  margin-bottom: 15px;
   border: none !important;
 }
 
 .banner-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
+  display: flex; justify-content: space-between; align-items: center;
 }
 
-.banner-link {
-  color: #fff;
-  text-decoration: underline;
-  font-weight: bold;
-}
+.banner-link { color: #fff; text-decoration: underline; font-weight: bold; }
 
 .close-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-  border-radius: 50%;
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: rgba(255, 255, 255, 0.2); border: none;
+  color: white; font-size: 20px; cursor: pointer;
+  border-radius: 50%; width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
 }
 
-.close-btn:hover {
-  background: rgba(255, 255, 255, 0.4);
-}
-
-.hidden {
-  display: none !important;
-}
+.hidden { display: none !important; }
