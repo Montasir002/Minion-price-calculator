@@ -29,7 +29,7 @@
     <div class="card">
       <div class="controls">
         <select id="minionSelect">
-          <option value="" disabled selected>Select Minion type</option>
+          <option value="" disabled selected>Loading Minions...</option>
         </select>
       </div>
     </div>
@@ -62,11 +62,12 @@
         const snap = await getDoc(doc(db, "prices", "items"));
         return snap.exists() ? snap.data() : {};
       } catch (e) {
-        console.error("Firebase Read Error:", e);
+        console.error("Firebase Error:", e);
         return {};
       }
     };
 
+    // SIGNAL SCRIPT.JS THAT FIREBASE IS READY
     window.firebaseRemoteReady = true;
   </script>
 
