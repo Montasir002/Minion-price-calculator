@@ -54,9 +54,10 @@
   const db = getFirestore(app);
 
   window.loadPricesFromFirebase = async function () {
-    const snap = await getDoc(doc(db, "prices", "items"));
-    return snap.exists() ? snap.data() : {};
-  };
+  const snap = await getDoc(doc(db, "prices", "items")); // Collection: prices, Doc: items
+  return snap.exists() ? snap.data() : {};
+};
+
 </script>
   <script src="script.js"></script>
   <script data-goatcounter="https://montasir02.goatcounter.com/count"
