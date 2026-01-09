@@ -10,138 +10,118 @@ const modeToggle = document.getElementById("modeToggle");
 let firebasePrices = {};
 let isPricesLoaded = false;
 
-/**
- * 1. Initialize Data
- * Loads item icons and Firebase prices at the same time
- */
+// 1. Initialize Data
 async function initializeData() {
-  try {
-    const [itemRes, prices] = await Promise.all([
-      fetch(LIB_BASE + "items.json").then(r => r.json()),
-      window.loadPricesFromFirebase ? window.loadPricesFromFirebase() : Promise.resolve({})
-    ]);
+    try {
+        console.log("Fetching Firebase Prices...");
+        const [itemData, prices] = await Promise.all([
+            fetch(LIB_BASE + "items.json").then(r => r.json()),
+            window.loadPricesFromFirebase ? window.loadPricesFromFirebase() : Promise.resolve({})
+        ]);
 
-    // Map item names to image URLs
-    itemRes.forEach(e => { if (e.item) itemImageMap[e.item] = e.url; });
-    
-    // Store prices from Firestore
-    firebasePrices = prices || {};
-    isPricesLoaded = true;
-    console.log("Database synced successfully.");
-  } catch (err) {
-    console.error("Initialization error:", err);
-    isPricesLoaded = true; // Set to true so the UI doesn't stay stuck
-  }
+        itemData.forEach(e => { if (e.item) itemImageMap[e.item] = e.url; });
+        
+        firebasePrices = prices || {};
+        isPricesLoaded = true;
+        
+        console.log("Firebase Prices Loaded:", firebasePrices); // CHECK THIS IN CONSOLE
+    } catch (err) {
+        console.error("Initialization failed:", err);
+        isPricesLoaded = true; 
+    }
 }
 
 initializeData();
 
 function getItemImage(itemName) { return itemImageMap[itemName] || DEFAULT_ITEM_ICON; }
 
-/**
- * 2. Load the list of Minions into the dropdown
- */
+// 2. Load Minion List
 fetch(LIB_BASE + "index.json").then(r => r.json()).then(data => {
-  data.minions.forEach(m => {
-    const opt = document.createElement("option");
-    opt.value = m.file; opt.textContent = m.name;
-    minionSelect.appendChild(opt);
-  });
+    data.minions.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m.file; opt.textContent = m.name;
+        minionSelect.appendChild(opt);
+    });
 });
 
 minionSelect.addEventListener("change", loadMinion);
 
-/**
- * 3. Generate the material input list
- */
 function loadMinion() {
-  if (!minionSelect.value) return;
-  
-  // If database isn't ready, wait half a second
-  if (!isPricesLoaded) {
-    materialsDiv.innerHTML = "Syncing prices...";
-    setTimeout(loadMinion, 500);
-    return;
-  }
+    if (!minionSelect.value) return;
 
-  materialsDiv.innerHTML = "Loading recipe...";
-  totalDiv.innerHTML = "";
+    // Wait if Firebase isn't ready
+    if (!isPricesLoaded) {
+        materialsDiv.innerHTML = "<div class='card'>Syncing with Bazaar...</div>";
+        setTimeout(loadMinion, 500);
+        return;
+    }
 
-  Promise.all([
-    fetch(LIB_BASE + "ignore_list.json").then(r => r.json()),
-    fetch(LIB_BASE + minionSelect.value).then(r => r.json())
-  ]).then(([ignoreData, minion]) => {
-    const ignoreItems = (ignoreData.ignore || []).map(i => i.item);
-    const materialSet = new Set();
+    materialsDiv.innerHTML = "Loading recipe...";
+    totalDiv.innerHTML = "";
 
-    // Find all unique materials needed for all tiers
-    for (let t = 1; t <= minion.max_tier; t++) {
-      (minion.tiers[t] || []).forEach(m => {
-        if (!m.item.includes("Minion") && !ignoreItems.includes(m.item)) {
-          materialSet.add(m.item);
+    Promise.all([
+        fetch(LIB_BASE + "ignore_list.json").then(r => r.json()),
+        fetch(LIB_BASE + minionSelect.value).then(r => r.json())
+    ]).then(([ignoreData, minion]) => {
+        const ignoreItems = (ignoreData.ignore || []).map(i => i.item);
+        const materialSet = new Set();
+
+        for (let t = 1; t <= minion.max_tier; t++) {
+            (minion.tiers[t] || []).forEach(m => {
+                if (!m.item.includes("Minion") && !ignoreItems.includes(m.item)) materialSet.add(m.item);
+            });
         }
-      });
-    }
 
-    materialsDiv.innerHTML = "<h3>Enter Bazaar Prices</h3>";
-    materialSet.forEach(item => {
-      // Logic: Match "Acacia Log" to Firestore field "Acacia_Log" or "Acacia Log"
-      const dbKey = item.replace(/ /g, "_");
-      const priceValue = firebasePrices[dbKey] ?? firebasePrices[item] ?? "";
+        materialsDiv.innerHTML = "<h3>Enter Bazaar Prices</h3>";
+        materialSet.forEach(item => {
+            // MATCHING LOGIC: 
+            // We look for the exact name (e.g., "Acacia Log")
+            // If that fails, we check for underscores (e.g., "Acacia_Log")
+            const price = firebasePrices[item] ?? firebasePrices[item.replace(/ /g, "_")] ?? 0;
 
-      materialsDiv.innerHTML += `
-        <div class="material-row">
-          <span><img src="${getItemImage(item)}" class="item-icon">${item}</span>
-          <input 
-            type="number" 
-            min="0" 
-            data-item="${item}" 
-            value="${priceValue}" 
-            placeholder="0"
-          >
-        </div>`;
+            materialsDiv.innerHTML += `
+                <div class="material-row" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                    <span style="display:flex; align-items:center;">
+                        <img src="${getItemImage(item)}" class="item-icon" style="width:24px; height:24px; margin-right:10px;">
+                        ${item}
+                    </span>
+                    <input type="number" min="0" data-item="${item}" value="${price}" placeholder="0" style="width:80px;">
+                </div>`;
+        });
+
+        const btn = document.createElement("button");
+        btn.className = "primary-btn";
+        btn.style.width = "100%";
+        btn.style.marginTop = "15px";
+        btn.textContent = "Calculate Prices";
+        btn.onclick = () => calculateTierPrices(minion);
+        materialsDiv.appendChild(btn);
     });
-
-    const btn = document.createElement("button");
-    btn.className = "primary-btn";
-    btn.style.width = "100%";
-    btn.style.marginTop = "15px";
-    btn.textContent = "Calculate Prices";
-    btn.onclick = () => calculateTierPrices(minion);
-    materialsDiv.appendChild(btn);
-  });
 }
 
-/**
- * 4. Calculate final crafting costs
- */
 async function calculateTierPrices(minion) {
-  const currentInputs = {};
-  document.querySelectorAll("#materials input").forEach(input => { 
-    currentInputs[input.dataset.item] = Number(input.value || 0); 
-  });
+    const prices = {};
+    document.querySelectorAll("#materials input").forEach(i => { prices[i.dataset.item] = Number(i.value || 0); });
 
-  let runningTotal = 0;
-  totalDiv.innerHTML = "<h3>Craft Cost Per Tier</h3>";
+    let runningTotal = 0;
+    totalDiv.innerHTML = "<h3>Craft Cost Per Tier</h3>";
 
-  for (let t = 1; t <= minion.max_tier; t++) {
-    let tierCost = 0;
-    for (const m of minion.tiers[t] || []) {
-      // Use user input if available, else 0
-      tierCost += (currentInputs[m.item] || 0) * m.qty;
+    for (let t = 1; t <= minion.max_tier; t++) {
+        let tierCost = 0;
+        for (const m of minion.tiers[t] || []) {
+            tierCost += (prices[m.item] || 0) * m.qty;
+        }
+        runningTotal += tierCost;
+
+        totalDiv.innerHTML += `
+            <div class="tier-row" style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #444;">
+                <span>${minion.name} T${t}</span>
+                <span class="tier-price" style="font-weight:bold; color:#00ff00;">${runningTotal.toLocaleString()} coins</span>
+            </div>`;
     }
-    runningTotal += tierCost;
-
-    totalDiv.innerHTML += `
-      <div class="tier-row">
-        <span>${minion.name} T${t}</span>
-        <span class="tier-price">${runningTotal.toLocaleString()} coins</span>
-      </div>`;
-  }
 }
 
-// Dark Mode Toggle
 modeToggle.onclick = () => {
-  document.body.classList.toggle("dark-mode");
-  modeToggle.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
+    document.body.classList.toggle("dark-mode");
+    modeToggle.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
 };
