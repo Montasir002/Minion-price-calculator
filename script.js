@@ -102,7 +102,7 @@ function calculate(minion) {
         cumulative += tierCost;
         totalDiv.innerHTML += `
             <div class="tier-row">
-                <span>Tier ${t}</span>
+                <span>${minion.name} T${t}</span>
                 <span class="tier-price">${cumulative.toLocaleString()} coins</span>
             </div>`;
     }
