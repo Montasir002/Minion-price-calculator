@@ -3,140 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-  <title>Bazaar Admin | Secure Mobile</title>
+  <title>Bazaar Admin | Bulk Upload</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* RESPONSIVE UI SYSTEM */
     :root {
       --primary: #00ff00;
       --bg-dark: #121212;
       --card-bg: #1e1e1e;
       --border: #333;
+      --danger: #ff4444;
     }
 
     body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       font-family: 'Inter', sans-serif;
       background-color: var(--bg-dark);
       color: white;
-      display: flex;
-      justify-content: center;
+      display: flex; justify-content: center;
     }
 
-    .admin-container {
-      width: 100%;
-      max-width: 600px;
-      min-height: 100vh;
-      padding: 15px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-    }
+    .admin-container { width: 100%; max-width: 600px; min-height: 100vh; padding: 15px; box-sizing: border-box; }
+    .card { background: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-bottom: 20px; }
+    
+    .input-field { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid var(--border); background: #000; color: white; box-sizing: border-box; }
+    
+    .admin-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .item-info { display: flex; align-items: center; gap: 12px; }
+    .item-icon { width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated; }
 
-    .card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-      margin-bottom: 20px;
-    }
-
-    #loginScreen { margin-top: 20vh; text-align: center; }
-
-    .input-field {
-      width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: #000;
-      color: white;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-
-    .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-
-    .search-box {
-      width: 100%;
-      padding: 12px 15px;
-      margin: 10px 0;
-      border-radius: 25px;
-      border: 1px solid var(--border);
-      background: #2a2a2a;
-      color: white;
-      box-sizing: border-box;
-      font-size: 14px;
-    }
-
-    .item-list {
-      flex-grow: 1;
-      overflow-y: auto;
-      margin: 10px 0;
-      padding-right: 5px;
-      max-height: 60vh;
-    }
-
-    .admin-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .item-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex: 1;
-    }
-
-    .item-icon {
-      width: 32px;
-      height: 32px;
-      object-fit: contain;
-      image-rendering: pixelated; /* Keeps Minecraft icons sharp */
-    }
-
-    .admin-row label {
-      font-size: 0.95rem;
-      color: #ddd;
-    }
-
-    .price-input {
-      width: 90px;
-      padding: 8px;
-      background: #000;
-      color: var(--primary);
-      border: 1px solid #444;
-      border-radius: 6px;
-      text-align: center;
-      font-weight: bold;
-    }
-
-    .footer-actions {
-      position: sticky;
-      bottom: 0;
-      background: var(--bg-dark);
-      padding: 15px 0;
-      width: 100%;
-    }
-
-    .primary-btn {
-      background: var(--primary);
-      color: black;
-      font-weight: 700;
-      border: none;
-      padding: 15px;
-      border-radius: 10px;
-      width: 100%;
-      cursor: pointer;
-    }
+    .price-input { width: 90px; padding: 8px; background: #000; color: var(--primary); border: 1px solid #444; border-radius: 6px; text-align: right; }
+    
+    .primary-btn { background: var(--primary); color: black; font-weight: 700; border: none; padding: 15px; border-radius: 10px; width: 100%; cursor: pointer; margin-top: 10px; }
+    .danger-btn { background: none; color: var(--danger); border: 1px solid var(--danger); padding: 10px; border-radius: 8px; width: 100%; cursor: pointer; margin-top: 20px; font-size: 0.8rem; }
 
     .hidden { display: none !important; }
-    #statusMsg { text-align: center; font-size: 0.85rem; margin-top: 10px; }
+    #statusMsg { text-align: center; margin-top: 10px; font-weight: bold; }
+    .search-box { width: 100%; padding: 12px; margin: 10px 0; border-radius: 25px; border: 1px solid var(--border); background: #2a2a2a; color: white; box-sizing: border-box; }
   </style>
 </head>
 <body>
@@ -148,29 +50,31 @@
       <input type="email" id="email" class="input-field" placeholder="Admin Email">
       <input type="password" id="password" class="input-field" placeholder="Password">
       <button id="loginBtn" class="primary-btn">Login</button>
-      <p id="loginError" style="color: #ff4444; font-size: 0.8rem; margin-top: 10px;"></p>
+      <p id="loginError" style="color: red;"></p>
     </div>
 
     <div id="adminDashboard" class="hidden">
-      <div class="header-flex">
-        <h2 style="margin:0;">Bazaar Admin</h2>
-        <button id="logoutBtn" style="background:none; border:none; color:#888; cursor:pointer;">Logout</button>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Bazaar Editor</h2>
+        <button id="logoutBtn" style="background:none; border:none; color:#888;">Logout</button>
       </div>
 
-      <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search items...">
+      <input type="text" id="searchInput" class="search-box" placeholder="Search items...">
 
-      <div class="card" style="padding: 10px 20px;">
-        <div id="itemList" class="item-list">
-          <p style="text-align:center; opacity:0.5;">Loading images & data...</p>
+      <div class="card">
+        <div id="itemList" style="max-height: 50vh; overflow-y: auto;">
+          <p style="text-align:center; opacity:0.5;">Loading database...</p>
         </div>
       </div>
 
-      <div class="footer-actions">
-        <button id="saveBtn" class="primary-btn">Save Changes</button>
-        <div id="statusMsg"></div>
+      <button id="saveBtn" class="primary-btn">Save All Changes</button>
+      <div id="statusMsg"></div>
+
+      <div style="margin-top: 40px; border-top: 1px solid #333; padding-top: 20px;">
+        <p style="color: #888; font-size: 0.8rem; text-align: center;">Advanced Actions</p>
+        <button id="bulkUploadBtn" class="danger-btn">⚠️ Reset DB from items.json (Bulk Upload)</button>
       </div>
     </div>
-
   </div>
 
   <script type="module">
@@ -190,28 +94,15 @@
     const docRef = doc(db, "prices", "items");
 
     const DEFAULT_ICON = "https://craftersmc.net/data/assets/logo/newOriginal512.png";
-    const itemImageMap = {};
+    let itemImageMap = {};
     let cachedData = {};
 
-    // 1. Fetch Item Icons
-    async function loadIcons() {
-      try {
-        const response = await fetch("./Minion_recipes/items.json");
-        const data = await response.json();
-        data.forEach(entry => {
-          if (entry.item) itemImageMap[entry.item] = entry.url;
-        });
-      } catch (err) {
-        console.error("Icon load failed:", err);
-      }
-    }
-
-    // AUTH OBSERVER
+    // 1. AUTH LOGIC
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        await loadIcons(); // Load icons first
         loginScreen.classList.add('hidden');
         adminDashboard.classList.remove('hidden');
+        await loadIcons();
         loadData();
       } else {
         loginScreen.classList.remove('hidden');
@@ -219,69 +110,87 @@
       }
     });
 
-    // LOGIN ACTION
     document.getElementById('loginBtn').onclick = async () => {
-      const email = document.getElementById('email').value;
-      const pass = document.getElementById('password').value;
       try {
-        await signInWithEmailAndPassword(auth, email, pass);
+        await signInWithEmailAndPassword(auth, email.value, password.value);
       } catch (err) {
-        document.getElementById('loginError').textContent = "Error: Invalid credentials.";
+        loginError.textContent = "Login Failed";
       }
     };
 
     document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
+    // 2. DATA LOADING
+    async function loadIcons() {
+      const res = await fetch("./Minion_recipes/items.json");
+      const data = await res.json();
+      data.forEach(e => { itemImageMap[e.item] = e.url; });
+    }
+
     async function loadData() {
       const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        cachedData = snap.data();
-        renderList();
-      }
+      cachedData = snap.exists() ? snap.data() : {};
+      renderList();
     }
 
     function renderList() {
-      const term = document.getElementById('searchInput').value.toLowerCase();
-      const list = document.getElementById('itemList');
-      list.innerHTML = "";
-      
-      const keys = Object.keys(cachedData).sort();
-      
-      keys.forEach(key => {
+      const term = searchInput.value.toLowerCase();
+      itemList.innerHTML = "";
+      Object.keys(cachedData).sort().forEach(key => {
         if (key.toLowerCase().includes(term)) {
-          const iconUrl = itemImageMap[key] || DEFAULT_ICON;
           const row = document.createElement('div');
           row.className = "admin-row";
           row.innerHTML = `
             <div class="item-info">
-              <img src="${iconUrl}" class="item-icon" onerror="this.src='${DEFAULT_ICON}'">
+              <img src="${itemImageMap[key] || DEFAULT_ICON}" class="item-icon">
               <label>${key}</label>
             </div>
-            <input type="number" class="price-input" 
-                   value="${cachedData[key]}" 
-                   onchange="window.updateCache('${key}', this.value)">
+            <input type="number" class="price-input" value="${cachedData[key]}" onchange="window.updateCache('${key}', this.value)">
           `;
-          list.appendChild(row);
+          itemList.appendChild(row);
         }
       });
     }
 
-    window.updateCache = (key, val) => { cachedData[key] = Number(val); };
-    document.getElementById('searchInput').oninput = renderList;
+    window.updateCache = (k, v) => { cachedData[k] = Number(v); };
+    searchInput.oninput = renderList;
 
-    document.getElementById('saveBtn').onclick = async () => {
-      const msg = document.getElementById('statusMsg');
-      msg.textContent = "Saving...";
+    // 3. REGULAR SAVE
+    saveBtn.onclick = async () => {
+      statusMsg.textContent = "Saving...";
+      await setDoc(docRef, cachedData);
+      statusMsg.textContent = "✅ Saved!";
+      setTimeout(() => statusMsg.textContent = "", 2000);
+    };
+
+    // 4. BULK UPLOAD LOGIC (YOUR REQUEST)
+    document.getElementById('bulkUploadBtn').onclick = async () => {
+      if (!confirm("This will overwrite all prices in your database with '0' based on your items.json file. Are you sure?")) return;
+
+      statusMsg.textContent = "Processing Bulk Upload...";
       try {
-        await setDoc(docRef, cachedData);
-        msg.textContent = "✅ All Prices Updated!";
-        msg.style.color = "#00ff00";
-        setTimeout(() => { msg.textContent = ""; }, 3000);
+        const res = await fetch("./Minion_recipes/items.json");
+        const itemsArray = await res.json();
+        const uploadData = {};
+
+        itemsArray.forEach(obj => {
+          if (obj.item) {
+            // Keep existing price if it exists, otherwise set to 0
+            uploadData[obj.item] = cachedData[obj.item] ?? 0;
+          }
+        });
+
+        await setDoc(docRef, uploadData);
+        statusMsg.style.color = "#00ff00";
+        statusMsg.textContent = "✅ Database Synchronized!";
+        loadData(); // Refresh the list
       } catch (err) {
-        msg.textContent = "❌ Permission Denied";
-        msg.style.color = "red";
+        console.error(err);
+        statusMsg.style.color = "red";
+        statusMsg.textContent = "❌ Upload Failed";
       }
     };
+
   </script>
 </body>
 </html>
