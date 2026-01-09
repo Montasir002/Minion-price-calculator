@@ -42,11 +42,7 @@
       margin-bottom: 20px;
     }
 
-    /* LOGIN SCREEN */
-    #loginScreen {
-      margin-top: 20vh;
-      text-align: center;
-    }
+    #loginScreen { margin-top: 20vh; text-align: center; }
 
     .input-field {
       width: 100%;
@@ -57,16 +53,10 @@
       background: #000;
       color: white;
       box-sizing: border-box;
-      font-size: 16px; /* Prevents iOS Zoom */
+      font-size: 16px;
     }
 
-    /* SEARCH & HEADER */
-    .header-flex {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
+    .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 
     .search-box {
       width: 100%;
@@ -80,7 +70,6 @@
       font-size: 14px;
     }
 
-    /* SCROLLABLE LIST */
     .item-list {
       flex-grow: 1;
       overflow-y: auto;
@@ -97,11 +86,23 @@
       border-bottom: 1px solid var(--border);
     }
 
+    .item-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .item-icon {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      image-rendering: pixelated; /* Keeps Minecraft icons sharp */
+    }
+
     .admin-row label {
       font-size: 0.95rem;
       color: #ddd;
-      flex: 1;
-      padding-right: 10px;
     }
 
     .price-input {
@@ -115,7 +116,6 @@
       font-weight: bold;
     }
 
-    /* STICKY FOOTER */
     .footer-actions {
       position: sticky;
       bottom: 0;
@@ -133,24 +133,13 @@
       border-radius: 10px;
       width: 100%;
       cursor: pointer;
-      transition: opacity 0.2s;
     }
 
-    .primary-btn:active { opacity: 0.7; }
     .hidden { display: none !important; }
-
-    #statusMsg {
-      text-align: center;
-      font-size: 0.85rem;
-      margin-top: 10px;
-    }
-
-    /* MOBILE SCROLLBAR */
-    .item-list::-webkit-scrollbar { width: 4px; }
-    .item-list::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
+    #statusMsg { text-align: center; font-size: 0.85rem; margin-top: 10px; }
   </style>
 </head>
-<body class="dark-mode">
+<body>
 
   <div class="admin-container">
     
@@ -158,7 +147,7 @@
       <h2>Admin Login</h2>
       <input type="email" id="email" class="input-field" placeholder="Admin Email">
       <input type="password" id="password" class="input-field" placeholder="Password">
-      <button id="loginBtn" class="primary-btn">Unlock Dashboard</button>
+      <button id="loginBtn" class="primary-btn">Login</button>
       <p id="loginError" style="color: #ff4444; font-size: 0.8rem; margin-top: 10px;"></p>
     </div>
 
@@ -168,11 +157,11 @@
         <button id="logoutBtn" style="background:none; border:none; color:#888; cursor:pointer;">Logout</button>
       </div>
 
-      <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search items (Acacia, Diamond...)">
+      <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search items...">
 
       <div class="card" style="padding: 10px 20px;">
         <div id="itemList" class="item-list">
-          <p style="text-align:center; opacity:0.5;">Connecting to Firebase...</p>
+          <p style="text-align:center; opacity:0.5;">Loading images & data...</p>
         </div>
       </div>
 
@@ -200,17 +189,27 @@
     const auth = getAuth(app);
     const docRef = doc(db, "prices", "items");
 
-    const loginScreen = document.getElementById('loginScreen');
-    const adminDashboard = document.getElementById('adminDashboard');
-    const itemListDiv = document.getElementById('itemList');
-    const statusMsg = document.getElementById('statusMsg');
-    const searchInput = document.getElementById('searchInput');
-
+    const DEFAULT_ICON = "https://craftersmc.net/data/assets/logo/newOriginal512.png";
+    const itemImageMap = {};
     let cachedData = {};
 
-    // AUTH OBSERVER - Checks if you are logged in
-    onAuthStateChanged(auth, (user) => {
+    // 1. Fetch Item Icons
+    async function loadIcons() {
+      try {
+        const response = await fetch("./Minion_recipes/items.json");
+        const data = await response.json();
+        data.forEach(entry => {
+          if (entry.item) itemImageMap[entry.item] = entry.url;
+        });
+      } catch (err) {
+        console.error("Icon load failed:", err);
+      }
+    }
+
+    // AUTH OBSERVER
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
+        await loadIcons(); // Load icons first
         loginScreen.classList.add('hidden');
         adminDashboard.classList.remove('hidden');
         loadData();
@@ -224,19 +223,15 @@
     document.getElementById('loginBtn').onclick = async () => {
       const email = document.getElementById('email').value;
       const pass = document.getElementById('password').value;
-      const errDisp = document.getElementById('loginError');
-      errDisp.textContent = "Verifying...";
       try {
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
-        errDisp.textContent = "Error: Invalid credentials.";
+        document.getElementById('loginError').textContent = "Error: Invalid credentials.";
       }
     };
 
-    // LOGOUT ACTION
     document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-    // FETCH DATA
     async function loadData() {
       const snap = await getDoc(docRef);
       if (snap.exists()) {
@@ -245,49 +240,46 @@
       }
     }
 
-    // SEARCH & RENDER
     function renderList() {
-      const term = searchInput.value.toLowerCase();
-      itemListDiv.innerHTML = "";
+      const term = document.getElementById('searchInput').value.toLowerCase();
+      const list = document.getElementById('itemList');
+      list.innerHTML = "";
+      
       const keys = Object.keys(cachedData).sort();
       
-      let count = 0;
       keys.forEach(key => {
         if (key.toLowerCase().includes(term)) {
-          count++;
+          const iconUrl = itemImageMap[key] || DEFAULT_ICON;
           const row = document.createElement('div');
           row.className = "admin-row";
           row.innerHTML = `
-            <label>${key}</label>
+            <div class="item-info">
+              <img src="${iconUrl}" class="item-icon" onerror="this.src='${DEFAULT_ICON}'">
+              <label>${key}</label>
+            </div>
             <input type="number" class="price-input" 
                    value="${cachedData[key]}" 
                    onchange="window.updateCache('${key}', this.value)">
           `;
-          itemListDiv.appendChild(row);
+          list.appendChild(row);
         }
       });
-      if(count === 0) itemListDiv.innerHTML = "<p style='text-align:center; opacity:0.5;'>No items found.</p>";
     }
 
-    // Update data in memory before saving
-    window.updateCache = (key, val) => {
-      cachedData[key] = Number(val);
-    };
+    window.updateCache = (key, val) => { cachedData[key] = Number(val); };
+    document.getElementById('searchInput').oninput = renderList;
 
-    searchInput.oninput = renderList;
-
-    // SAVE TO CLOUD
     document.getElementById('saveBtn').onclick = async () => {
-      statusMsg.textContent = "Saving to Cloud...";
-      statusMsg.style.color = "orange";
+      const msg = document.getElementById('statusMsg');
+      msg.textContent = "Saving...";
       try {
         await setDoc(docRef, cachedData);
-        statusMsg.textContent = "✅ All Prices Updated!";
-        statusMsg.style.color = "#00ff00";
-        setTimeout(() => { statusMsg.textContent = ""; }, 3000);
+        msg.textContent = "✅ All Prices Updated!";
+        msg.style.color = "#00ff00";
+        setTimeout(() => { msg.textContent = ""; }, 3000);
       } catch (err) {
-        statusMsg.textContent = "❌ Permission Denied";
-        statusMsg.style.color = "red";
+        msg.textContent = "❌ Permission Denied";
+        msg.style.color = "red";
       }
     };
   </script>
