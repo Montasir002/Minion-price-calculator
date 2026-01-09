@@ -2,41 +2,186 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Secure Bazaar Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Bazaar Admin | Secure Mobile</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    .admin-card { max-width: 600px; margin: 40px auto; padding: 25px; }
+    /* RESPONSIVE UI SYSTEM */
+    :root {
+      --primary: #00ff00;
+      --bg-dark: #121212;
+      --card-bg: #1e1e1e;
+      --border: #333;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-dark);
+      color: white;
+      display: flex;
+      justify-content: center;
+    }
+
+    .admin-container {
+      width: 100%;
+      max-width: 600px;
+      min-height: 100vh;
+      padding: 15px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      margin-bottom: 20px;
+    }
+
+    /* LOGIN SCREEN */
+    #loginScreen {
+      margin-top: 20vh;
+      text-align: center;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #000;
+      color: white;
+      box-sizing: border-box;
+      font-size: 16px; /* Prevents iOS Zoom */
+    }
+
+    /* SEARCH & HEADER */
+    .header-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border-radius: 25px;
+      border: 1px solid var(--border);
+      background: #2a2a2a;
+      color: white;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    /* SCROLLABLE LIST */
+    .item-list {
+      flex-grow: 1;
+      overflow-y: auto;
+      margin: 10px 0;
+      padding-right: 5px;
+      max-height: 60vh;
+    }
+
+    .admin-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .admin-row label {
+      font-size: 0.95rem;
+      color: #ddd;
+      flex: 1;
+      padding-right: 10px;
+    }
+
+    .price-input {
+      width: 90px;
+      padding: 8px;
+      background: #000;
+      color: var(--primary);
+      border: 1px solid #444;
+      border-radius: 6px;
+      text-align: right;
+      font-weight: bold;
+    }
+
+    /* STICKY FOOTER */
+    .footer-actions {
+      position: sticky;
+      bottom: 0;
+      background: var(--bg-dark);
+      padding: 15px 0;
+      width: 100%;
+    }
+
+    .primary-btn {
+      background: var(--primary);
+      color: black;
+      font-weight: 700;
+      border: none;
+      padding: 15px;
+      border-radius: 10px;
+      width: 100%;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .primary-btn:active { opacity: 0.7; }
     .hidden { display: none !important; }
-    .search-box { width: 100%; padding: 12px; margin: 15px 0; border-radius: 8px; background: #1a1a1a; color: white; border: 1px solid #555; }
-    .item-list { max-height: 50vh; overflow-y: auto; }
-    .admin-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #333; }
-    .admin-row input { width: 80px; background: #000; color: #00ff00; border: 1px solid #444; text-align: right; }
+
+    #statusMsg {
+      text-align: center;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+
+    /* MOBILE SCROLLBAR */
+    .item-list::-webkit-scrollbar { width: 4px; }
+    .item-list::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
   </style>
 </head>
 <body class="dark-mode">
 
-  <div id="loginScreen" class="admin-card card">
-    <h1>Admin Login</h1>
-    <input type="email" id="email" placeholder="Email" style="width:100%; margin-bottom:10px; padding:10px;">
-    <input type="password" id="password" placeholder="Password" style="width:100%; margin-bottom:10px; padding:10px;">
-    <button id="loginBtn" class="primary-btn" style="width:100%;">Login</button>
-    <p id="loginError" style="color:red;"></p>
-  </div>
-
-  <div id="adminDashboard" class="admin-card card hidden">
-    <div style="display:flex; justify-content:space-between;">
-        <h1>Bazaar Admin</h1>
-        <button id="logoutBtn" style="background:none; color:grey; border:none; cursor:pointer;">Logout</button>
-    </div>
+  <div class="admin-container">
     
-    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search items...">
-
-    <div id="itemList" class="item-list"></div>
-
-    <div style="margin-top:20px; position:sticky; bottom:0; background:#111; padding:10px;">
-      <button id="saveBtn" class="primary-btn" style="width: 100%;">Save Changes</button>
-      <div id="statusMsg" style="text-align:center; margin-top:10px;"></div>
+    <div id="loginScreen" class="card">
+      <h2>Admin Login</h2>
+      <input type="email" id="email" class="input-field" placeholder="Admin Email">
+      <input type="password" id="password" class="input-field" placeholder="Password">
+      <button id="loginBtn" class="primary-btn">Unlock Dashboard</button>
+      <p id="loginError" style="color: #ff4444; font-size: 0.8rem; margin-top: 10px;"></p>
     </div>
+
+    <div id="adminDashboard" class="hidden">
+      <div class="header-flex">
+        <h2 style="margin:0;">Bazaar Admin</h2>
+        <button id="logoutBtn" style="background:none; border:none; color:#888; cursor:pointer;">Logout</button>
+      </div>
+
+      <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search items (Acacia, Diamond...)">
+
+      <div class="card" style="padding: 10px 20px;">
+        <div id="itemList" class="item-list">
+          <p style="text-align:center; opacity:0.5;">Connecting to Firebase...</p>
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <button id="saveBtn" class="primary-btn">Save Changes</button>
+        <div id="statusMsg"></div>
+      </div>
+    </div>
+
   </div>
 
   <script type="module">
@@ -55,35 +200,44 @@
     const auth = getAuth(app);
     const docRef = doc(db, "prices", "items");
 
-    // --- Auth Observer ---
+    const loginScreen = document.getElementById('loginScreen');
+    const adminDashboard = document.getElementById('adminDashboard');
+    const itemListDiv = document.getElementById('itemList');
+    const statusMsg = document.getElementById('statusMsg');
+    const searchInput = document.getElementById('searchInput');
+
+    let cachedData = {};
+
+    // AUTH OBSERVER - Checks if you are logged in
     onAuthStateChanged(auth, (user) => {
       if (user) {
         loginScreen.classList.add('hidden');
         adminDashboard.classList.remove('hidden');
-        loadPrices();
+        loadData();
       } else {
         loginScreen.classList.remove('hidden');
         adminDashboard.classList.add('hidden');
       }
     });
 
-    // --- Login ---
+    // LOGIN ACTION
     document.getElementById('loginBtn').onclick = async () => {
       const email = document.getElementById('email').value;
       const pass = document.getElementById('password').value;
+      const errDisp = document.getElementById('loginError');
+      errDisp.textContent = "Verifying...";
       try {
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
-        document.getElementById('loginError').textContent = "Login Failed: " + err.message;
+        errDisp.textContent = "Error: Invalid credentials.";
       }
     };
 
-    // --- Logout ---
+    // LOGOUT ACTION
     document.getElementById('logoutBtn').onclick = () => signOut(auth);
 
-    // --- Load/Render ---
-    let cachedData = {};
-    async function loadPrices() {
+    // FETCH DATA
+    async function loadData() {
       const snap = await getDoc(docRef);
       if (snap.exists()) {
         cachedData = snap.data();
@@ -91,35 +245,49 @@
       }
     }
 
+    // SEARCH & RENDER
     function renderList() {
-      const term = document.getElementById('searchInput').value.toLowerCase();
-      const list = document.getElementById('itemList');
-      list.innerHTML = "";
-      Object.keys(cachedData).sort().forEach(key => {
+      const term = searchInput.value.toLowerCase();
+      itemListDiv.innerHTML = "";
+      const keys = Object.keys(cachedData).sort();
+      
+      let count = 0;
+      keys.forEach(key => {
         if (key.toLowerCase().includes(term)) {
+          count++;
           const row = document.createElement('div');
           row.className = "admin-row";
-          row.innerHTML = `<label>${key}</label>
-                           <input type="number" value="${cachedData[key]}" onchange="window.updateCache('${key}', this.value)">`;
-          list.appendChild(row);
+          row.innerHTML = `
+            <label>${key}</label>
+            <input type="number" class="price-input" 
+                   value="${cachedData[key]}" 
+                   onchange="window.updateCache('${key}', this.value)">
+          `;
+          itemListDiv.appendChild(row);
         }
       });
+      if(count === 0) itemListDiv.innerHTML = "<p style='text-align:center; opacity:0.5;'>No items found.</p>";
     }
 
-    window.updateCache = (key, val) => { cachedData[key] = Number(val); };
-    document.getElementById('searchInput').oninput = renderList;
+    // Update data in memory before saving
+    window.updateCache = (key, val) => {
+      cachedData[key] = Number(val);
+    };
 
-    // --- Save ---
+    searchInput.oninput = renderList;
+
+    // SAVE TO CLOUD
     document.getElementById('saveBtn').onclick = async () => {
-      const msg = document.getElementById('statusMsg');
-      msg.textContent = "Saving...";
+      statusMsg.textContent = "Saving to Cloud...";
+      statusMsg.style.color = "orange";
       try {
         await setDoc(docRef, cachedData);
-        msg.textContent = "✅ Saved Successfully!";
-        msg.style.color = "#00ff00";
+        statusMsg.textContent = "✅ All Prices Updated!";
+        statusMsg.style.color = "#00ff00";
+        setTimeout(() => { statusMsg.textContent = ""; }, 3000);
       } catch (err) {
-        msg.textContent = "❌ Permission Denied (Check Rules)";
-        msg.style.color = "red";
+        statusMsg.textContent = "❌ Permission Denied";
+        statusMsg.style.color = "red";
       }
     };
   </script>
