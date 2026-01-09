@@ -229,3 +229,48 @@ footer {
 .discord-link:hover {
   text-decoration: underline;
 }
+
+
+/* Recruitment Banner Styles */
+.banner {
+  background: linear-gradient(90deg, #3b82f6, #2563eb) !important; /* Blue gradient */
+  color: white !important;
+  padding: 12px 20px !important;
+  margin-bottom: 15px;
+  border: none !important;
+}
+
+.banner-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.banner-link {
+  color: #fff;
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.hidden {
+  display: none !important;
+}
