@@ -7,27 +7,52 @@ const materialsDiv = document.getElementById("materials");
 const totalDiv = document.getElementById("total");
 const modeToggle = document.getElementById("modeToggle");
 
+// Create the Load Button
+const loadBtn = document.createElement("button");
+loadBtn.id = "loadMinionBtn";
+loadBtn.className = "primary-btn";
+loadBtn.style.width = "100%";
+loadBtn.style.marginTop = "10px";
+loadBtn.textContent = "Syncing with Database...";
+loadBtn.disabled = true; // Disabled by default
+minionSelect.parentElement.appendChild(loadBtn);
+
 let firebasePrices = {};
 let isPricesLoaded = false;
 
-// 1. Initialize Data
 async function initializeData() {
+    const awaitFirebase = () => {
+        return new Promise((resolve) => {
+            const check = () => {
+                if (window.firebaseRemoteReady && typeof window.loadPricesFromFirebase === 'function') {
+                    resolve();
+                } else {
+                    setTimeout(check, 100);
+                }
+            };
+            check();
+        });
+    };
+
     try {
-        console.log("Fetching Firebase Prices...");
+        await awaitFirebase();
         const [itemData, prices] = await Promise.all([
             fetch(LIB_BASE + "items.json").then(r => r.json()),
-            window.loadPricesFromFirebase ? window.loadPricesFromFirebase() : Promise.resolve({})
+            window.loadPricesFromFirebase()
         ]);
 
         itemData.forEach(e => { if (e.item) itemImageMap[e.item] = e.url; });
-        
         firebasePrices = prices || {};
         isPricesLoaded = true;
-        
-        console.log("Firebase Prices Loaded:", firebasePrices); // CHECK THIS IN CONSOLE
+
+        // Enable button once data is in memory
+        loadBtn.textContent = "Load Minion Data";
+        loadBtn.disabled = false;
+        console.log("Database Ready");
     } catch (err) {
         console.error("Initialization failed:", err);
-        isPricesLoaded = true; 
+        loadBtn.textContent = "Offline Mode (Manual Prices)";
+        loadBtn.disabled = false;
     }
 }
 
@@ -35,7 +60,7 @@ initializeData();
 
 function getItemImage(itemName) { return itemImageMap[itemName] || DEFAULT_ITEM_ICON; }
 
-// 2. Load Minion List
+// Load Minion List into dropdown
 fetch(LIB_BASE + "index.json").then(r => r.json()).then(data => {
     data.minions.forEach(m => {
         const opt = document.createElement("option");
@@ -44,19 +69,13 @@ fetch(LIB_BASE + "index.json").then(r => r.json()).then(data => {
     });
 });
 
-minionSelect.addEventListener("change", loadMinion);
+// Trigger load only on button click
+loadBtn.addEventListener("click", loadMinion);
 
 function loadMinion() {
     if (!minionSelect.value) return;
 
-    // Wait if Firebase isn't ready
-    if (!isPricesLoaded) {
-        materialsDiv.innerHTML = "<div class='card'>Syncing with Bazaar...</div>";
-        setTimeout(loadMinion, 500);
-        return;
-    }
-
-    materialsDiv.innerHTML = "Loading recipe...";
+    materialsDiv.innerHTML = "Processing recipe...";
     totalDiv.innerHTML = "";
 
     Promise.all([
@@ -74,9 +93,7 @@ function loadMinion() {
 
         materialsDiv.innerHTML = "<h3>Enter Bazaar Prices</h3>";
         materialSet.forEach(item => {
-            // MATCHING LOGIC: 
-            // We look for the exact name (e.g., "Acacia Log")
-            // If that fails, we check for underscores (e.g., "Acacia_Log")
+            // Match exactly or with underscores
             const price = firebasePrices[item] ?? firebasePrices[item.replace(/ /g, "_")] ?? 0;
 
             materialsDiv.innerHTML += `
@@ -89,13 +106,13 @@ function loadMinion() {
                 </div>`;
         });
 
-        const btn = document.createElement("button");
-        btn.className = "primary-btn";
-        btn.style.width = "100%";
-        btn.style.marginTop = "15px";
-        btn.textContent = "Calculate Prices";
-        btn.onclick = () => calculateTierPrices(minion);
-        materialsDiv.appendChild(btn);
+        const calcBtn = document.createElement("button");
+        calcBtn.className = "primary-btn";
+        calcBtn.style.width = "100%";
+        calcBtn.style.marginTop = "15px";
+        calcBtn.textContent = "Calculate Prices";
+        calcBtn.onclick = () => calculateTierPrices(minion);
+        materialsDiv.appendChild(calcBtn);
     });
 }
 
