@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bazaar Admin - Edit Prices</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-card { max-width: 600px; margin: 40px auto; padding: 25px; }
+        .item-list { margin-top: 20px; max-height: 60vh; overflow-y: auto; padding-right: 10px; }
+        .admin-row { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 10px 0; border-bottom: 1px solid #444; 
+        }
+        .admin-row label { font-weight: 600; color: #eee; }
+        .admin-row input { 
+            width: 100px; padding: 8px; border-radius: 4px; 
+            border: 1px solid #555; background: #222; color: white;
+        }
+        .save-section { margin-top: 20px; text-align: center; }
+        #statusMsg { margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body class="dark-mode">
+
+    <div class="admin-card card">
+        <h1>Admin Dashboard</h1>
+        <p>Update prices in the Firestore database.</p>
+        
+        <div id="itemList" class="item-list">
+            <p>Loading items from Firebase...</p>
+        </div>
+
+        <div class="save-section">
+            <button id="saveBtn" class="primary-btn" style="width: 100%;">Update All Prices</button>
+            <div id="statusMsg"></div>
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 0.8rem; opacity: 0.6;">
+            Note: This updates the "prices/items" document.
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDy-AQZOGLc65rCIZAHlrdHes4VTvw6QmY",
+            authDomain: "craftersmc-bazar.firebaseapp.com",
+            projectId: "craftersmc-bazar",
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const docRef = doc(db, "prices", "items");
+
+        const itemListDiv = document.getElementById('itemList');
+        const statusMsg = document.getElementById('statusMsg');
+
+        // 1. Load data from Firebase
+        async function loadPrices() {
+            try {
+                const snap = await getDoc(docRef);
+                if (snap.exists()) {
+                    const data = snap.data();
+                    itemListDiv.innerHTML = "";
+                    
+                    // Sort items alphabetically
+                    const sortedKeys = Object.keys(data).sort();
+                    
+                    sortedKeys.forEach(itemName => {
+                        itemListDiv.innerHTML += `
+                            <div class="admin-row">
+                                <label>${itemName}</label>
+                                <input type="number" class="price-input" data-name="${itemName}" value="${data[itemName]}">
+                            </div>`;
+                    });
+                } else {
+                    itemListDiv.innerHTML = "No document found at prices/items";
+                }
+            } catch (err) {
+                itemListDiv.innerHTML = "Error loading data: " + err.message;
+            }
+        }
+
+        // 2. Save data back to Firebase
+        document.getElementById('saveBtn').onclick = async () => {
+            statusMsg.textContent = "Saving...";
+            statusMsg.style.color = "orange";
+            
+            const updatedData = {};
+            document.querySelectorAll('.price-input').forEach(input => {
+                updatedData[input.dataset.name] = Number(input.value);
+            });
+
+            try {
+                await setDoc(docRef, updatedData);
+                statusMsg.textContent = "✅ Prices updated successfully!";
+                statusMsg.style.color = "#00ff00";
+                setTimeout(() => { statusMsg.textContent = ""; }, 3000);
+            } catch (err) {
+                console.error(err);
+                statusMsg.textContent = "❌ Error saving: Check your Firebase Rules.";
+                statusMsg.style.color = "#ff4444";
+            }
+        };
+
+        loadPrices();
+    </script>
+</body>
+</html>
