@@ -146,17 +146,17 @@ if (closeBanner) {
     };
 }
 
-// --- Banner Dismiss Logic ---
+// --- Banner Dismiss Logic (Corrected) ---
 const helpBanner = document.getElementById("helpBanner");
 const closeBanner = document.getElementById("closeBanner");
 
-// Check if user previously hid it
+// Check if user previously hid it on page load
 if (localStorage.getItem("hideBazaarBanner") === "true") {
     if (helpBanner) helpBanner.classList.add("hidden");
 }
 
 // Close button functionality
-if (closeBanner) {
+if (closeBanner && helpBanner) {
     closeBanner.onclick = () => {
         helpBanner.classList.add("hidden");
         // Save the hidden state so it stays hidden after refresh
