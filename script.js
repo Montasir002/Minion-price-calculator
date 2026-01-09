@@ -8,6 +8,14 @@ const materialsDiv = document.getElementById("materials");
 const totalDiv = document.getElementById("total");
 const modeToggle = document.getElementById("modeToggle");
 
+let firebasePrices = {};
+
+(async () => {
+  if (window.loadPricesFromFirebase) {
+    firebasePrices = await window.loadPricesFromFirebase();
+  }
+})();
+
 // Load images
 fetch(LIB_BASE + "items.json").then(r => r.json()).then(data => {
   data.forEach(e => { if (e.item) itemImageMap[e.item] = e.url; });
