@@ -145,3 +145,21 @@ if (closeBanner) {
         localStorage.setItem("hideBazaarBanner", "true");
     };
 }
+
+// --- Banner Dismiss Logic ---
+const helpBanner = document.getElementById("helpBanner");
+const closeBanner = document.getElementById("closeBanner");
+
+// Check if user previously hid it
+if (localStorage.getItem("hideBazaarBanner") === "true") {
+    if (helpBanner) helpBanner.classList.add("hidden");
+}
+
+// Close button functionality
+if (closeBanner) {
+    closeBanner.onclick = () => {
+        helpBanner.classList.add("hidden");
+        // Save the hidden state so it stays hidden after refresh
+        localStorage.setItem("hideBazaarBanner", "true");
+    };
+}
