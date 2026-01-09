@@ -1,3 +1,6 @@
+/* =========================
+   THEME VARIABLES
+========================= */
 :root {
   --bg-color: #f8fafc;
   --card-bg: #ffffff;
@@ -18,7 +21,7 @@
   --input-bg: #0f172a;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; transition: background-color 0.2s ease; }
 
 body {
   margin: 0; padding: 20px;
@@ -49,13 +52,11 @@ header h1 { margin: 0; font-size: 2.2rem; color: var(--accent); }
   box-shadow: 0 6px 12px rgba(0,0,0,0.08);
 }
 
-select, input {
-  padding: 12px; border-radius: 10px;
+select {
+  width: 100%; padding: 12px; border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--input-bg); color: var(--text-primary);
 }
-
-select { width: 100%; }
 
 .primary-btn {
   width: 100%; margin-top: 16px;
@@ -64,12 +65,39 @@ select { width: 100%; }
   border-radius: 10px; font-weight: 600; cursor: pointer;
 }
 
+/* =========================
+   FIXED MATERIAL LIST UI
+========================= */
 .material-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 0; border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Pushes input to the right */
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
 }
 
-.item-icon { width: 24px; height: 24px; vertical-align: middle; margin-right: 8px; }
+.material-row span {
+  display: flex;
+  align-items: center;
+  flex: 1; /* Takes up remaining space */
+}
+
+.item-icon {
+  width: 24px; height: 24px;
+  margin-right: 10px;
+  image-rendering: pixelated;
+}
+
+.material-row input {
+  width: 100px; /* FIXED WIDTH LIKE ADMIN PAGE */
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  text-align: right;
+}
 
 .tier-row {
   display: flex; justify-content: space-between;
@@ -85,26 +113,11 @@ select { width: 100%; }
 }
 
 footer { text-align: center; margin-top: 40px; color: var(--text-secondary); }
-.discord-link { color: #7289da; text-decoration: none; }
+.discord-link { color: #7289da; text-decoration: none; font-weight: bold; }
 
-/* Recruitment Banner */
-.banner {
-  background: linear-gradient(90deg, #3b82f6, #2563eb) !important;
-  color: white !important;
-  border: none !important;
-}
-
-.banner-content {
-  display: flex; justify-content: space-between; align-items: center;
-}
-
+/* Banner Styles */
+.banner { background: linear-gradient(90deg, #3b82f6, #2563eb) !important; color: white !important; border: none !important; }
+.banner-content { display: flex; justify-content: space-between; align-items: center; }
 .banner-link { color: #fff; text-decoration: underline; font-weight: bold; }
-
-.close-btn {
-  background: rgba(255, 255, 255, 0.2); border: none;
-  color: white; font-size: 20px; cursor: pointer;
-  border-radius: 50%; width: 24px; height: 24px;
-  display: flex; align-items: center; justify-content: center;
-}
-
+.close-btn { background: rgba(255,255,255,0.2); border: none; color: white; cursor: pointer; border-radius: 50%; width: 24px; height: 24px; }
 .hidden { display: none !important; }
