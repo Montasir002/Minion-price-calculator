@@ -57,7 +57,13 @@ function loadMinion() {
       materialsDiv.innerHTML += `
         <div class="material-row">
           <span><img src="${getItemImage(item)}" class="item-icon">${item}</span>
-          <input type="number" min="0" data-item="${item}" placeholder="0">
+          <input
+  type="number"
+  min="0"
+  data-item="${item}"
+  value="${firebasePrices[item] ?? ''}"
+  placeholder="0"
+>
         </div>`;
     });
 
