@@ -1,4 +1,5 @@
 const LIB_BASE = "./Minion_recipes/";
+const itemImageMap = {};
 const DEFAULT_ITEM_ICON = "https://craftersmc.net/data/assets/logo/newOriginal512.png";
 
 const minionSelect = document.getElementById("minionSelect");
@@ -6,132 +7,125 @@ const materialsDiv = document.getElementById("materials");
 const totalDiv = document.getElementById("total");
 const modeToggle = document.getElementById("modeToggle");
 
-const itemImageMap = {};
+let firebasePrices = {};
 
-/* ======================
-   LOAD ITEM IMAGES
-====================== */
-fetch(LIB_BASE + "items.json")
-  .then(r => r.json())
-  .then(items => {
-    items.forEach(({ item, url }) => {
-      if (item) itemImageMap[item] = url;
-    });
-  });
-
-const getItemImage = name => itemImageMap[name] || DEFAULT_ITEM_ICON;
-
-/* ======================
-   LOAD MINION LIST
-====================== */
-fetch(LIB_BASE + "index.json")
-  .then(r => r.json())
-  .then(data => {
-    data.minions.forEach(({ file, name }) => {
-      const opt = document.createElement("option");
-      opt.value = file;
-      opt.textContent = name;
-      minionSelect.appendChild(opt);
-    });
-  });
-
-minionSelect.addEventListener("change", loadMinion);
-
-/* ======================
-   LOAD MINION
-====================== */
-function loadMinion() {
-  if (!minionSelect.value) return;
-
-  materialsDiv.textContent = "Loading...";
-  totalDiv.innerHTML = "";
-
-  Promise.all([
-    fetch(LIB_BASE + "ignore_list.json").then(r => r.json()),
-    fetch(LIB_BASE + minionSelect.value).then(r => r.json())
-  ])
-    .then(([ignoreData, minion]) => {
-      const ignoreItems = (ignoreData.ignore || []).map(i => i.item);
-      const materials = new Set();
-
-      for (let t = 1; t <= minion.max_tier; t++) {
-        (minion.tiers[t] || []).forEach(m => {
-          if (!m.item.includes("Minion") && !ignoreItems.includes(m.item)) {
-            materials.add(m.item);
-          }
+async function initializeData() {
+    const awaitFirebase = () => {
+        return new Promise((resolve) => {
+            const check = () => {
+                if (window.firebaseRemoteReady && typeof window.loadPricesFromFirebase === 'function') {
+                    resolve();
+                } else {
+                    setTimeout(check, 100);
+                }
+            };
+            check();
         });
-      }
+    };
 
-      renderMaterialInputs([...materials], minion);
-    })
-    .catch(() => {
-      materialsDiv.textContent = "Failed to load minion data";
+    try {
+        await awaitFirebase();
+        const [itemData, prices] = await Promise.all([
+            fetch(LIB_BASE + "items.json").then(r => r.json()),
+            window.loadPricesFromFirebase()
+        ]);
+
+        itemData.forEach(e => { if (e.item) itemImageMap[e.item] = e.url; });
+        firebasePrices = prices || {};
+
+        // Load list
+        fetch(LIB_BASE + "index.json").then(r => r.json()).then(data => {
+            minionSelect.innerHTML = '<option value="" disabled selected>Select Minion type</option>';
+            data.minions.forEach(m => {
+                const opt = document.createElement("option");
+                opt.value = m.file; opt.textContent = m.name;
+                minionSelect.appendChild(opt);
+            });
+            minionSelect.disabled = false;
+        });
+    } catch (err) {
+        console.error("Init error:", err);
+    }
+}
+
+function getItemImage(itemName) { return itemImageMap[itemName] || DEFAULT_ITEM_ICON; }
+
+minionSelect.addEventListener("change", async () => {
+    if (!minionSelect.value) return;
+    materialsDiv.innerHTML = "Loading recipe...";
+    totalDiv.innerHTML = "";
+
+    const [ignoreData, minion] = await Promise.all([
+        fetch(LIB_BASE + "ignore_list.json").then(r => r.json()),
+        fetch(LIB_BASE + minionSelect.value).then(r => r.json())
+    ]);
+
+    const ignoreItems = (ignoreData.ignore || []).map(i => i.item);
+    const materialSet = new Set();
+
+    for (let t = 1; t <= minion.max_tier; t++) {
+        (minion.tiers[t] || []).forEach(m => {
+            if (!ignoreItems.includes(m.item)) materialSet.add(m.item);
+        });
+    }
+
+    materialsDiv.innerHTML = "<h3>Bazaar Prices</h3>";
+    Array.from(materialSet).sort().forEach(item => {
+        const price = firebasePrices[item] ?? 0;
+        materialsDiv.innerHTML += `
+            <div class="material-row">
+                <span><img src="${getItemImage(item)}" class="item-icon">${item}</span>
+                <input type="number" data-item="${item}" value="${price}">
+            </div>`;
     });
-}
 
-/* ======================
-   MATERIAL INPUT UI
-====================== */
-function renderMaterialInputs(items, minion) {
-  materialsDiv.innerHTML = "<h3>Enter Bazaar Prices</h3>";
+    const btn = document.createElement("button");
+    btn.className = "primary-btn";
+    btn.textContent = "Calculate Total Cost";
+    btn.onclick = () => calculate(minion);
+    materialsDiv.appendChild(btn);
+});
 
-  items.forEach(item => {
-    materialsDiv.innerHTML += `
-      <div class="material-row">
-        <span>
-          <img src="${getItemImage(item)}" class="item-icon">
-          ${item}
-        </span>
-        <input type="number" min="0" data-item="${item}" placeholder="0">
-      </div>
-    `;
-  });
-
-  const btn = document.createElement("button");
-  btn.className = "primary-btn";
-  btn.style.width = "100%";
-  btn.style.marginTop = "15px";
-  btn.textContent = "Calculate Prices";
-  btn.onclick = () => calculateTierPrices(minion);
-
-  materialsDiv.appendChild(btn);
-}
-
-/* ======================
-   CALCULATION
-====================== */
-function calculateTierPrices(minion) {
-  const prices = {};
-  document.querySelectorAll("#materials input").forEach(i => {
-    prices[i.dataset.item] = Number(i.value || 0);
-  });
-
-  let total = 0;
-  totalDiv.innerHTML = "<h3>Craft Cost Per Tier</h3>";
-
-  for (let t = 1; t <= minion.max_tier; t++) {
-    let tierCost = 0;
-
-    (minion.tiers[t] || []).forEach(m => {
-      tierCost += (prices[m.item] || 0) * m.qty;
+function calculate(minion) {
+    const currentPrices = {};
+    document.querySelectorAll("#materials input").forEach(i => {
+        currentPrices[i.dataset.item] = Number(i.value || 0);
     });
 
-    total += tierCost;
-
-    totalDiv.innerHTML += `
-      <div class="tier-row">
-        <span>${minion.name} T${t}</span>
-        <span class="tier-price">${total.toLocaleString()} coins</span>
-      </div>
-    `;
-  }
+    let cumulative = 0;
+    totalDiv.innerHTML = "<h3>Cost Per Tier</h3>";
+    for (let t = 1; t <= minion.max_tier; t++) {
+        let tierCost = 0;
+        (minion.tiers[t] || []).forEach(m => {
+            tierCost += (currentPrices[m.item] || 0) * m.qty;
+        });
+        cumulative += tierCost;
+        totalDiv.innerHTML += `
+            <div class="tier-row">
+                <span>${minion.name} T${t}</span>
+                <span class="tier-price">${cumulative.toLocaleString()} coins</span>
+            </div>`;
+    }
 }
 
-/* ======================
-   DARK MODE
-====================== */
 modeToggle.onclick = () => {
-  document.body.classList.toggle("dark-mode");
-  modeToggle.textContent =
-    document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
+    document.body.classList.toggle("dark-mode");
+    modeToggle.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
 };
+
+// Banner Logic (Fixed - No redeclarations)
+const helpBanner = document.getElementById("helpBanner");
+const closeBanner = document.getElementById("closeBanner");
+
+if (localStorage.getItem("hideBazaarBanner") === "true") {
+    if (helpBanner) helpBanner.classList.add("hidden");
+}
+
+if (closeBanner) {
+    closeBanner.onclick = () => {
+        helpBanner.classList.add("hidden");
+        localStorage.setItem("hideBazaarBanner", "true");
+    };
+}
+
+initializeData();
