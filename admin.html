@@ -174,114 +174,176 @@
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+/* =========================
+   FIREBASE IMPORTS
+========================= */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, addDoc, collection, serverTimestamp } 
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDy-AQZOGLc65rCIZAHlrdHes4VTvw6QmY",
-      authDomain: "craftersmc-bazar.firebaseapp.com",
-      projectId: "craftersmc-bazar",
-    };
+/* =========================
+   FIREBASE CONFIG
+========================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyDy-AQZOGLc65rCIZAHlrdHes4VTvw6QmY",
+  authDomain: "craftersmc-bazar.firebaseapp.com",
+  projectId: "craftersmc-bazar",
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    const docRef = doc(db, "prices", "items");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-    const DEFAULT_ICON = "https://craftersmc.net/data/assets/logo/newOriginal512.png";
-    const itemImageMap = {};
-    let cachedData = {};
+/* =========================
+   REFERENCES
+========================= */
+const priceDocRef = doc(db, "prices", "items");
+const logCollectionRef = collection(db, "price_logs");
 
-    // 1. Fetch Item Icons
-    async function loadIcons() {
-      try {
-        const response = await fetch("./Minion_recipes/items.json");
-        const data = await response.json();
-        data.forEach(entry => {
-          if (entry.item) itemImageMap[entry.item] = entry.url;
-        });
-      } catch (err) {
-        console.error("Icon load failed:", err);
-      }
+const DEFAULT_ICON = "https://craftersmc.net/data/assets/logo/newOriginal512.png";
+const itemImageMap = {};
+let cachedData = {};
+let originalData = {};
+
+/* =========================
+   LOAD ITEM ICONS
+========================= */
+async function loadIcons() {
+  const res = await fetch("./Minion_recipes/items.json");
+  const data = await res.json();
+  data.forEach(e => {
+    if (e.item) itemImageMap[e.item] = e.url;
+  });
+}
+
+/* =========================
+   AUTH OBSERVER
+========================= */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    loginScreen.classList.remove("hidden");
+    adminDashboard.classList.add("hidden");
+    return;
+  }
+
+  loginScreen.classList.add("hidden");
+  adminDashboard.classList.remove("hidden");
+
+  await loadIcons();
+  await loadPrices();
+});
+
+/* =========================
+   LOGIN / LOGOUT
+========================= */
+loginBtn.onclick = async () => {
+  try {
+    await signInWithEmailAndPassword(
+      auth,
+      email.value,
+      password.value
+    );
+  } catch {
+    loginError.textContent = "Invalid email or password";
+  }
+};
+
+logoutBtn.onclick = () => signOut(auth);
+
+/* =========================
+   LOAD PRICES
+========================= */
+async function loadPrices() {
+  const snap = await getDoc(priceDocRef);
+  if (!snap.exists()) return;
+
+  cachedData = { ...snap.data() };
+  originalData = { ...snap.data() }; // clone for diff
+  renderList();
+}
+
+/* =========================
+   RENDER ITEM LIST
+========================= */
+function renderList() {
+  const term = searchInput.value.toLowerCase();
+  itemList.innerHTML = "";
+
+  Object.keys(cachedData).sort().forEach(item => {
+    if (!item.toLowerCase().includes(term)) return;
+
+    const row = document.createElement("div");
+    row.className = "admin-row";
+    row.innerHTML = `
+      <div class="item-info">
+        <img src="${itemImageMap[item] || DEFAULT_ICON}" 
+             class="item-icon"
+             onerror="this.src='${DEFAULT_ICON}'">
+        <label>${item}</label>
+      </div>
+      <input type="number"
+             class="price-input"
+             value="${cachedData[item]}"
+             data-item="${item}">
+    `;
+    itemList.appendChild(row);
+  });
+}
+
+searchInput.oninput = renderList;
+
+/* =========================
+   SAVE + LOG CHANGES
+========================= */
+saveBtn.onclick = async () => {
+  statusMsg.textContent = "Saving...";
+  statusMsg.style.color = "white";
+
+  // Update cache from inputs
+  document.querySelectorAll(".price-input").forEach(i => {
+    cachedData[i.dataset.item] = Number(i.value || 0);
+  });
+
+  // Detect changes
+  const changes = {};
+  Object.keys(cachedData).forEach(item => {
+    if (cachedData[item] !== originalData[item]) {
+      changes[item] = {
+        from: originalData[item] ?? 0,
+        to: cachedData[item]
+      };
     }
+  });
 
-    // AUTH OBSERVER
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        await loadIcons(); // Load icons first
-        loginScreen.classList.add('hidden');
-        adminDashboard.classList.remove('hidden');
-        loadData();
-      } else {
-        loginScreen.classList.remove('hidden');
-        adminDashboard.classList.add('hidden');
-      }
+  if (Object.keys(changes).length === 0) {
+    statusMsg.textContent = "No changes detected";
+    return;
+  }
+
+  try {
+    // Save prices
+    await setDoc(priceDocRef, cachedData);
+
+    // Save log
+    await addDoc(logCollectionRef, {
+      updatedBy: auth.currentUser.email,
+      timestamp: serverTimestamp(),
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      items: changes
     });
 
-    // LOGIN ACTION
-    document.getElementById('loginBtn').onclick = async () => {
-      const email = document.getElementById('email').value;
-      const pass = document.getElementById('password').value;
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-      } catch (err) {
-        document.getElementById('loginError').textContent = "Error: Invalid credentials.";
-      }
-    };
+    originalData = { ...cachedData };
+    statusMsg.textContent = "✅ Saved & Logged";
+    statusMsg.style.color = "#00ff00";
 
-    document.getElementById('logoutBtn').onclick = () => signOut(auth);
-
-    async function loadData() {
-      const snap = await getDoc(docRef);
-      if (snap.exists()) {
-        cachedData = snap.data();
-        renderList();
-      }
-    }
-
-    function renderList() {
-      const term = document.getElementById('searchInput').value.toLowerCase();
-      const list = document.getElementById('itemList');
-      list.innerHTML = "";
-
-      const keys = Object.keys(cachedData).sort();
-
-      keys.forEach(key => {
-        if (key.toLowerCase().includes(term)) {
-          const iconUrl = itemImageMap[key] || DEFAULT_ICON;
-          const row = document.createElement('div');
-          row.className = "admin-row";
-          row.innerHTML = `
-            <div class="item-info">
-              <img src="${iconUrl}" class="item-icon" onerror="this.src='${DEFAULT_ICON}'">
-              <label>${key}</label>
-            </div>
-            <input type="number" class="price-input" 
-                   value="${cachedData[key]}" 
-                   onchange="window.updateCache('${key}', this.value)">
-          `;
-          list.appendChild(row);
-        }
-      });
-    }
-
-    window.updateCache = (key, val) => { cachedData[key] = Number(val); };
-    document.getElementById('searchInput').oninput = renderList;
-
-    document.getElementById('saveBtn').onclick = async () => {
-      const msg = document.getElementById('statusMsg');
-      msg.textContent = "Saving...";
-      try {
-        await setDoc(docRef, cachedData);
-        msg.textContent = "✅ All Prices Updated!";
-        msg.style.color = "#00ff00";
-        setTimeout(() => { msg.textContent = ""; }, 3000);
-      } catch (err) {
-        msg.textContent = "❌ Permission Denied";
-        msg.style.color = "red";
-      }
-    };
-  </script>
+    setTimeout(() => statusMsg.textContent = "", 3000);
+  } catch (err) {
+    statusMsg.textContent = "❌ Save failed";
+    statusMsg.style.color = "red";
+  }
+};
+</script>
 </body>
 </html>
