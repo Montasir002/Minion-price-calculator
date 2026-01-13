@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <title>Bazar Admin | Secure Mobile</title>
-  <link rel="stylesheet" href="style.css">
   <style>
-    /* RESPONSIVE UI SYSTEM */
     :root {
       --primary: #00ff00;
       --bg-dark: #121212;
@@ -17,7 +15,7 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', -apple-system, sans-serif;
       background-color: var(--bg-dark);
       color: white;
       display: flex;
@@ -42,7 +40,7 @@
       margin-bottom: 20px;
     }
 
-    #loginScreen { margin-top: 20vh; text-align: center; }
+    #loginScreen { margin-top: 15vh; text-align: center; }
 
     .input-field {
       width: 100%;
@@ -76,13 +74,16 @@
       margin: 10px 0;
       padding-right: 5px;
       max-height: 60vh;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #181818;
     }
 
     .admin-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 0;
+      padding: 12px;
       border-bottom: 1px solid var(--border);
     }
 
@@ -97,16 +98,11 @@
       width: 32px;
       height: 32px;
       object-fit: contain;
-      image-rendering: pixelated; /* Keeps Minecraft icons sharp */
-    }
-
-    .admin-row label {
-      font-size: 0.95rem;
-      color: #ddd;
+      image-rendering: pixelated;
     }
 
     .price-input {
-      width: 90px;
+      width: 100px;
       padding: 8px;
       background: #000;
       color: var(--primary);
@@ -135,197 +131,217 @@
       cursor: pointer;
     }
 
+    .secondary-btn {
+      background: transparent;
+      color: #888;
+      border: 1px solid #444;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
     .hidden { display: none !important; }
-    #statusMsg { text-align: center; font-size: 0.85rem; margin-top: 10px; }
-</style>
-  <script type="module">
-/* =========================
-   FIREBASE IMPORTS
-========================= */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  addDoc,
-  collection,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    #statusMsg { text-align: center; font-size: 0.85rem; margin-top: 10px; min-height: 1.2em; }
+    #loginError { color: #ff4444; font-size: 0.85rem; margin-top: 10px; }
+  </style>
+</head>
+<body>
 
-/* =========================
-   FIREBASE CONFIG
-========================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyDy-AQZOGLc65rCIZAHlrdHes4VTvw6QmY",
-  authDomain: "craftersmc-bazar.firebaseapp.com",
-  projectId: "craftersmc-bazar",
-};
+<div class="admin-container">
+  <div id="loginScreen" class="card">
+    <img src="https://craftersmc.net/data/assets/logo/newOriginal512.png" style="width:80px; margin-bottom:10px;">
+    <h2>Bazar Admin</h2>
+    <input type="email" id="email" class="input-field" placeholder="Admin Email">
+    <input type="password" id="password" class="input-field" placeholder="Password">
+    <button id="loginBtn" class="primary-btn">Login</button>
+    <div id="loginError"></div>
+  </div>
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+  <div id="adminDashboard" class="hidden">
+    <div class="header-flex">
+      <h3>Price Control</h3>
+      <button id="logoutBtn" class="secondary-btn">Logout</button>
+    </div>
+    
+    <input type="text" id="searchInput" class="search-box" placeholder="Search for an item...">
+    
+    <div id="itemList" class="item-list">
+      <div style="padding:20px; text-align:center; color:#666;">Loading items...</div>
+    </div>
 
-/* =========================
-   REFERENCES
-========================= */
-const priceDocRef = doc(db, "prices", "items");
-const logCollectionRef = collection(db, "price_logs");
+    <div class="footer-actions">
+      <button id="saveBtn" class="primary-btn">Save All Changes</button>
+      <div id="statusMsg"></div>
+    </div>
+  </div>
+</div>
 
-const DEFAULT_ICON = "https://craftersmc.net/data/assets/logo/newOriginal512.png";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, addDoc, collection, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import {
+    getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-let itemImageMap = {};
-let cachedData = {};
-let originalData = {};
+  // --- CONFIG ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyDy-AQZOGLc65rCIZAHlrdHes4VTvw6QmY",
+    authDomain: "craftersmc-bazar.firebaseapp.com",
+    projectId: "craftersmc-bazar",
+  };
 
-/* =========================
-   LOAD ICONS
-========================= */
-async function loadIcons() {
-  const res = await fetch("./Minion_recipes/items.json");
-  const data = await res.json();
-  data.forEach(i => {
-    if (i.item) itemImageMap[i.item] = i.url;
-  });
-}
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
 
-/* =========================
-   AUTH STATE
-========================= */
-onAuthStateChanged(auth, async user => {
-  if (!user) {
-    loginScreen.classList.remove("hidden");
-    adminDashboard.classList.add("hidden");
-    return;
-  }
+  // --- DOM ELEMENTS ---
+  const el = {
+    loginScreen: document.getElementById('loginScreen'),
+    adminDashboard: document.getElementById('adminDashboard'),
+    email: document.getElementById('email'),
+    password: document.getElementById('password'),
+    loginBtn: document.getElementById('loginBtn'),
+    logoutBtn: document.getElementById('logoutBtn'),
+    loginError: document.getElementById('loginError'),
+    itemList: document.getElementById('itemList'),
+    searchInput: document.getElementById('searchInput'),
+    saveBtn: document.getElementById('saveBtn'),
+    statusMsg: document.getElementById('statusMsg')
+  };
 
-  loginScreen.classList.add("hidden");
-  adminDashboard.classList.remove("hidden");
+  const priceDocRef = doc(db, "prices", "items");
+  const logCollectionRef = collection(db, "price_logs");
+  const DEFAULT_ICON = "https://craftersmc.net/data/assets/logo/newOriginal512.png";
 
-  await loadIcons();
-  await loadPrices();
-});
+  let itemImageMap = {};
+  let cachedData = {};
+  let originalData = {};
 
-/* =========================
-   LOGIN / LOGOUT
-========================= */
-loginBtn.onclick = async () => {
-  loginError.textContent = "";
-  try {
-    await signInWithEmailAndPassword(auth, email.value, password.value);
-  } catch (e) {
-    loginError.textContent = "Invalid email or password";
-  }
-};
-
-logoutBtn.onclick = () => signOut(auth);
-
-/* =========================
-   LOAD PRICES
-========================= */
-async function loadPrices() {
-  const snap = await getDoc(priceDocRef);
-  if (!snap.exists()) return;
-
-  cachedData = { ...snap.data() };
-  originalData = { ...snap.data() };
-  renderList();
-}
-
-/* =========================
-   RENDER LIST
-========================= */
-function renderList() {
-  const term = searchInput.value.toLowerCase();
-  itemList.innerHTML = "";
-
-  Object.keys(cachedData).sort().forEach(item => {
-    if (!item.toLowerCase().includes(term)) return;
-
-    const row = document.createElement("div");
-    row.className = "admin-row";
-    row.innerHTML = `
-      <div class="item-info">
-        <img src="${itemImageMap[item] || DEFAULT_ICON}"
-             class="item-icon"
-             onerror="this.src='${DEFAULT_ICON}'">
-        <label>${item}</label>
-      </div>
-      <input type="number"
-             class="price-input"
-             value="${cachedData[item]}"
-             data-item="${item}">
-    `;
-    itemList.appendChild(row);
-  });
-}
-
-searchInput.oninput = renderList;
-
-/* =========================
-   SAVE CHANGES (FIXED)
-========================= */
-saveBtn.onclick = async () => {
-  statusMsg.textContent = "Saving...";
-  statusMsg.style.color = "white";
-
-  // Update cache from inputs
-  document.querySelectorAll(".price-input").forEach(i => {
-    cachedData[i.dataset.item] = Number(i.value || 0);
-  });
-
-  // Detect changes
-  const changes = {};
-  for (const item in cachedData) {
-    if (cachedData[item] !== originalData[item]) {
-      changes[item] = {
-        from: originalData[item] ?? 0,
-        to: cachedData[item]
-      };
+  // --- LOAD ASSETS ---
+  async function loadIcons() {
+    try {
+      const res = await fetch("./Minion_recipes/items.json");
+      if (!res.ok) throw new Error("Icon file not found");
+      const data = await res.json();
+      data.forEach(i => { if (i.item) itemImageMap[i.item] = i.url; });
+    } catch (e) {
+      console.warn("Could not load icons, using defaults.");
     }
   }
 
-  if (Object.keys(changes).length === 0) {
-    statusMsg.textContent = "No changes detected";
-    return;
+  // --- AUTH LOGIC ---
+  onAuthStateChanged(auth, async user => {
+    if (user) {
+      el.loginScreen.classList.add("hidden");
+      el.adminDashboard.classList.remove("hidden");
+      await loadIcons();
+      await loadPrices();
+    } else {
+      el.loginScreen.classList.remove("hidden");
+      el.adminDashboard.classList.add("hidden");
+    }
+  });
+
+  el.loginBtn.onclick = async () => {
+    el.loginError.textContent = "";
+    try {
+      await signInWithEmailAndPassword(auth, el.email.value, el.password.value);
+    } catch (e) {
+      el.loginError.textContent = "Auth Error: " + e.message;
+    }
+  };
+
+  el.logoutBtn.onclick = () => signOut(auth);
+
+  // --- DATA LOGIC ---
+  async function loadPrices() {
+    try {
+      const snap = await getDoc(priceDocRef);
+      if (snap.exists()) {
+        cachedData = { ...snap.data() };
+        originalData = { ...snap.data() };
+        renderList();
+      } else {
+        el.itemList.innerHTML = "<div style='padding:20px'>No data found in Firestore.</div>";
+      }
+    } catch (err) {
+      el.statusMsg.textContent = "Error loading data.";
+    }
   }
 
-  /* ---------- SAVE PRICES (CRITICAL) ---------- */
-  try {
-    await setDoc(priceDocRef, cachedData);
-    originalData = { ...cachedData };
-  } catch (err) {
-    console.error("PRICE SAVE FAILED:", err);
-    statusMsg.textContent = "❌ Price save failed";
-    statusMsg.style.color = "red";
-    return;
+  function renderList() {
+    const term = el.searchInput.value.toLowerCase();
+    el.itemList.innerHTML = "";
+
+    const sortedItems = Object.keys(cachedData).sort();
+    
+    sortedItems.forEach(item => {
+      if (!item.toLowerCase().includes(term)) return;
+
+      const row = document.createElement("div");
+      row.className = "admin-row";
+      row.innerHTML = `
+        <div class="item-info">
+          <img src="${itemImageMap[item] || DEFAULT_ICON}" class="item-icon" 
+               onerror="this.src='${DEFAULT_ICON}'">
+          <label>${item}</label>
+        </div>
+        <input type="number" class="price-input" 
+               value="${cachedData[item]}" 
+               data-item="${item}">
+      `;
+      el.itemList.appendChild(row);
+    });
   }
 
-  /* ---------- SAVE LOG (NON-CRITICAL) ---------- */
-  try {
-    await addDoc(logCollectionRef, {
-      updatedBy: auth.currentUser.email,
-      timestamp: serverTimestamp(),
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      items: changes
+  el.searchInput.oninput = renderList;
+
+  // --- SAVE LOGIC ---
+  el.saveBtn.onclick = async () => {
+    el.statusMsg.textContent = "Saving...";
+    el.statusMsg.style.color = "white";
+
+    // Sync current inputs to cache
+    document.querySelectorAll(".price-input").forEach(input => {
+      cachedData[input.dataset.item] = Number(input.value || 0);
     });
 
-    statusMsg.textContent = "✅ Saved & Logged";
-    statusMsg.style.color = "#00ff00";
-  } catch (err) {
-    console.warn("LOG FAILED:", err);
-    statusMsg.textContent = "⚠ Saved (log failed)";
-    statusMsg.style.color = "orange";
-  }
+    const changes = {};
+    for (const item in cachedData) {
+      if (cachedData[item] !== originalData[item]) {
+        changes[item] = { from: originalData[item] ?? 0, to: cachedData[item] };
+      }
+    }
 
-  setTimeout(() => statusMsg.textContent = "", 3000);
-};
+    if (Object.keys(changes).length === 0) {
+      el.statusMsg.textContent = "No changes detected.";
+      return;
+    }
+
+    try {
+      // 1. Update Prices
+      await setDoc(priceDocRef, cachedData);
+      
+      // 2. Log History
+      await addDoc(logCollectionRef, {
+        updatedBy: auth.currentUser.email,
+        timestamp: serverTimestamp(),
+        items: changes
+      });
+
+      originalData = { ...cachedData };
+      el.statusMsg.textContent = "✅ Update Successful";
+      el.statusMsg.style.color = var(--primary);
+    } catch (err) {
+      el.statusMsg.textContent = "❌ Error: " + err.message;
+      el.statusMsg.style.color = "#ff4444";
+    }
+
+    setTimeout(() => { el.statusMsg.textContent = ""; }, 3000);
+  };
 </script>
+
 </body>
 </html>
