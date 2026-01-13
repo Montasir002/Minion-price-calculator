@@ -137,51 +137,26 @@
 
     .hidden { display: none !important; }
     #statusMsg { text-align: center; font-size: 0.85rem; margin-top: 10px; }
-  </style>
-</head>
-<body>
-
-  <div class="admin-container">
-
-    <div id="loginScreen" class="card">
-      <h2>Admin Login</h2>
-      <input type="email" id="email" class="input-field" placeholder="Enter Email">
-      <input type="password" id="password" class="input-field" placeholder="Enter Password">
-      <button id="loginBtn" class="primary-btn">Login</button>
-      <p id="loginError" style="color: #ff4444; font-size: 0.8rem; margin-top: 10px;"></p>
-    </div>
-
-    <div id="adminDashboard" class="hidden">
-      <div class="header-flex">
-        <h2 style="margin:0;">Bazar Admin</h2>
-        <button id="logoutBtn" style="background:none; border:none; color:#888; cursor:pointer;">Logout</button>
-      </div>
-
-      <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search items...">
-
-      <div class="card" style="padding: 10px 20px;">
-        <div id="itemList" class="item-list">
-          <p style="text-align:center; opacity:0.5;">Loading images & data...</p>
-        </div>
-      </div>
-
-      <div class="footer-actions">
-        <button id="saveBtn" class="primary-btn">Save Changes</button>
-        <div id="statusMsg"></div>
-      </div>
-    </div>
-
-  </div>
-
   <script type="module">
 /* =========================
    FIREBASE IMPORTS
 ========================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, addDoc, collection, serverTimestamp } 
-  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
-  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  addDoc,
+  collection,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* =========================
    FIREBASE CONFIG
@@ -203,25 +178,26 @@ const priceDocRef = doc(db, "prices", "items");
 const logCollectionRef = collection(db, "price_logs");
 
 const DEFAULT_ICON = "https://craftersmc.net/data/assets/logo/newOriginal512.png";
-const itemImageMap = {};
+
+let itemImageMap = {};
 let cachedData = {};
 let originalData = {};
 
 /* =========================
-   LOAD ITEM ICONS
+   LOAD ICONS
 ========================= */
 async function loadIcons() {
   const res = await fetch("./Minion_recipes/items.json");
   const data = await res.json();
-  data.forEach(e => {
-    if (e.item) itemImageMap[e.item] = e.url;
+  data.forEach(i => {
+    if (i.item) itemImageMap[i.item] = i.url;
   });
 }
 
 /* =========================
-   AUTH OBSERVER
+   AUTH STATE
 ========================= */
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, async user => {
   if (!user) {
     loginScreen.classList.remove("hidden");
     adminDashboard.classList.add("hidden");
@@ -239,13 +215,10 @@ onAuthStateChanged(auth, async (user) => {
    LOGIN / LOGOUT
 ========================= */
 loginBtn.onclick = async () => {
+  loginError.textContent = "";
   try {
-    await signInWithEmailAndPassword(
-      auth,
-      email.value,
-      password.value
-    );
-  } catch {
+    await signInWithEmailAndPassword(auth, email.value, password.value);
+  } catch (e) {
     loginError.textContent = "Invalid email or password";
   }
 };
@@ -260,12 +233,12 @@ async function loadPrices() {
   if (!snap.exists()) return;
 
   cachedData = { ...snap.data() };
-  originalData = { ...snap.data() }; // clone for diff
+  originalData = { ...snap.data() };
   renderList();
 }
 
 /* =========================
-   RENDER ITEM LIST
+   RENDER LIST
 ========================= */
 function renderList() {
   const term = searchInput.value.toLowerCase();
@@ -278,7 +251,7 @@ function renderList() {
     row.className = "admin-row";
     row.innerHTML = `
       <div class="item-info">
-        <img src="${itemImageMap[item] || DEFAULT_ICON}" 
+        <img src="${itemImageMap[item] || DEFAULT_ICON}"
              class="item-icon"
              onerror="this.src='${DEFAULT_ICON}'">
         <label>${item}</label>
@@ -295,7 +268,7 @@ function renderList() {
 searchInput.oninput = renderList;
 
 /* =========================
-   SAVE + LOG CHANGES
+   SAVE CHANGES (FIXED)
 ========================= */
 saveBtn.onclick = async () => {
   statusMsg.textContent = "Saving...";
@@ -308,25 +281,33 @@ saveBtn.onclick = async () => {
 
   // Detect changes
   const changes = {};
-  Object.keys(cachedData).forEach(item => {
+  for (const item in cachedData) {
     if (cachedData[item] !== originalData[item]) {
       changes[item] = {
         from: originalData[item] ?? 0,
         to: cachedData[item]
       };
     }
-  });
+  }
 
   if (Object.keys(changes).length === 0) {
     statusMsg.textContent = "No changes detected";
     return;
   }
 
+  /* ---------- SAVE PRICES (CRITICAL) ---------- */
   try {
-    // Save prices
     await setDoc(priceDocRef, cachedData);
+    originalData = { ...cachedData };
+  } catch (err) {
+    console.error("PRICE SAVE FAILED:", err);
+    statusMsg.textContent = "❌ Price save failed";
+    statusMsg.style.color = "red";
+    return;
+  }
 
-    // Save log
+  /* ---------- SAVE LOG (NON-CRITICAL) ---------- */
+  try {
     await addDoc(logCollectionRef, {
       updatedBy: auth.currentUser.email,
       timestamp: serverTimestamp(),
@@ -334,15 +315,15 @@ saveBtn.onclick = async () => {
       items: changes
     });
 
-    originalData = { ...cachedData };
     statusMsg.textContent = "✅ Saved & Logged";
     statusMsg.style.color = "#00ff00";
-
-    setTimeout(() => statusMsg.textContent = "", 3000);
   } catch (err) {
-    statusMsg.textContent = "❌ Save failed";
-    statusMsg.style.color = "red";
+    console.warn("LOG FAILED:", err);
+    statusMsg.textContent = "⚠ Saved (log failed)";
+    statusMsg.style.color = "orange";
   }
+
+  setTimeout(() => statusMsg.textContent = "", 3000);
 };
 </script>
 </body>
