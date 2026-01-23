@@ -1,0 +1,40 @@
+{
+  "name": "Enderman Minion",
+  "max_tier": 11,
+  "tiers": {
+    "1": [
+      { "item": "Wooden Sword", "qty": 1 },
+      { "item": "Ender Pearl", "qty": 80 }
+    ],
+    "2": [
+      { "item": "Ender Pearl", "qty": 128 }
+    ],
+    "3": [
+      { "item": "Enchanted Ender Pearl", "qty": 8 }
+    ],
+    "4": [
+      { "item": "Enchanted Ender Pearl", "qty": 24 }
+    ],
+    "5": [
+      { "item": "Enchanted Ender Pearl", "qty": 48 }
+    ],
+    "6": [
+      { "item": "Enchanted Ender Pearl", "qty": 96 }
+    ],
+    "7": [
+      { "item": "Enchanted Ender Eye", "qty": 8 }
+    ],
+    "8": [
+      { "item": "Enchanted Ender Eye", "qty": 24 }
+    ],
+    "9": [
+      { "item": "Enchanted Ender Eye", "qty": 48 }
+    ],
+    "10": [
+      { "item": "Enchanted Ender Eye", "qty": 96 }
+    ],
+    "11": [
+      { "item": "Enchanted Ender Eye", "qty": 192 }
+    ]
+  }
+}
