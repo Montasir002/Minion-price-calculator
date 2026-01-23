@@ -16,6 +16,8 @@
     { "id": "diamond_minion", "name": "Diamond Minion", "file": "diamond_minion.json" },
     { "id": "duck_minion", "name": "Duck Minion", "file": "duck_minion.json" },
     { "id": "emerald_minion", "name": "Emerald Minion", "file": "emerald_minion.json" },
+    { "id": "enderman_minion", "name": "Enderman Minion", "file": "enderman_minion.json" },
+    { "id": "end_stone_minion", "name": "End Stone Minion", "file": "end_stone_minion.json" },
     { "id": "gold_minion", "name": "Gold Minion", "file": "gold_minion.json" },
     { "id": "ice_minion", "name": "Ice Minion", "file": "ice_minion.json" },
     { "id": "iron_minion", "name": "Iron Minion", "file": "iron_minion.json" },
