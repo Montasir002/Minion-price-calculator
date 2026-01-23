@@ -1,0 +1,40 @@
+{
+  "name": "End Stone Minion",
+  "max_tier": 11,
+  "tiers": {
+    "1": [
+      { "item": "Wooden Pickaxe", "qty": 1 },
+      { "item": "End Stone", "qty": 80 }
+    ],
+    "2": [
+      { "item": "End Stone", "qty": 160 }
+    ],
+    "3": [
+      { "item": "End Stone", "qty": 320 }
+    ],
+    "4": [
+      { "item": "End Stone", "qty": 512 }
+    ],
+    "5": [
+      { "item": "Enchanted End Stone", "qty": 8 }
+    ],
+    "6": [
+      { "item": "Enchanted End Stone", "qty": 16 }
+    ],
+    "7": [
+      { "item": "Enchanted End Stone", "qty": 32 }
+    ],
+    "8": [
+      { "item": "Enchanted End Stone", "qty": 64 }
+    ],
+    "9": [
+      { "item": "Enchanted End Stone", "qty": 128 }
+    ],
+    "10": [
+      { "item": "Enchanted End Stone", "qty": 256 }
+    ],
+    "11": [
+      { "item": "Enchanted End Stone", "qty": 512 }
+    ]
+  }
+}
