@@ -177,29 +177,15 @@
 </div>
 
 <script type="module">
-/* =========================
-   FIREBASE IMPORTS
-========================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  addDoc,
-  collection,
-  serverTimestamp
+  getFirestore, doc, getDoc, setDoc, addDoc, collection, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {
-  getAuth,
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
+  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* =========================
-   CONFIG
-========================= */
+/* CONFIG */
 const firebaseConfig = {
   apiKey: "AIzaSyDy-AQZOGLc65rCIZAHlrdHes4VTvw6QmY",
   authDomain: "craftersmc-bazar.firebaseapp.com",
@@ -210,9 +196,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-/* =========================
-   DOM ELEMENTS
-========================= */
+/* DOM */
 const el = {
   loginScreen: document.getElementById("loginScreen"),
   adminDashboard: document.getElementById("adminDashboard"),
@@ -227,34 +211,21 @@ const el = {
   statusMsg: document.getElementById("statusMsg")
 };
 
-/* FAIL FAST */
-if (!el.loginBtn || !el.saveBtn) {
-  console.error("Critical DOM elements missing");
-  alert("Admin UI failed to load");
-  throw new Error("DOM init failed");
-}
-
-/* =========================
-   REFERENCES
-========================= */
 const priceDocRef = doc(db, "prices", "items");
 const logCollectionRef = collection(db, "price_logs");
 const DEFAULT_ICON = "https://craftersmc.net/data/assets/logo/newOriginal512.png";
 
-/* =========================
-   STATE
-========================= */
+/* STATE */
 let itemImageMap = {};
 let cachedData = {};
 let originalData = {};
 
-/* =========================
-   LOAD ICONS (NON-BLOCKING)
-========================= */
+/* LOAD ICONS */
 async function loadIcons() {
   try {
     const res = await fetch("./Minion_recipes/items.json");
     if (!res.ok) return;
+
     const data = await res.json();
     data.forEach(i => {
       if (i.item && i.url) itemImageMap[i.item] = i.url;
@@ -264,9 +235,7 @@ async function loadIcons() {
   }
 }
 
-/* =========================
-   AUTH OBSERVER
-========================= */
+/* AUTH */
 onAuthStateChanged(auth, async user => {
   if (!user) {
     el.loginScreen.classList.remove("hidden");
@@ -277,15 +246,14 @@ onAuthStateChanged(auth, async user => {
   el.loginScreen.classList.add("hidden");
   el.adminDashboard.classList.remove("hidden");
 
-  loadIcons(); // do not await
+  loadIcons(); // non-blocking
   await loadPrices();
 });
 
-/* =========================
-   LOGIN / LOGOUT
-========================= */
+/* LOGIN */
 el.loginBtn.onclick = async () => {
   el.loginError.textContent = "";
+
   try {
     await signInWithEmailAndPassword(
       auth,
@@ -300,14 +268,13 @@ el.loginBtn.onclick = async () => {
 
 el.logoutBtn.onclick = () => signOut(auth);
 
-/* =========================
-   LOAD PRICES
-========================= */
+/* LOAD PRICES */
 async function loadPrices() {
   el.itemList.innerHTML = "<div style='padding:20px;color:#666'>Loading...</div>";
 
   try {
     const snap = await getDoc(priceDocRef);
+
     if (!snap.exists()) {
       el.itemList.innerHTML = "<div style='padding:20px'>No price data found.</div>";
       return;
@@ -315,25 +282,27 @@ async function loadPrices() {
 
     cachedData = { ...snap.data() };
     originalData = { ...snap.data() };
+
     renderList();
+
   } catch (err) {
     el.itemList.innerHTML = "<div style='padding:20px;color:red'>Load failed</div>";
     console.error(err);
   }
 }
 
-/* =========================
-   RENDER LIST
-========================= */
+/* RENDER */
 function renderList() {
   const term = el.searchInput.value.toLowerCase();
   el.itemList.innerHTML = "";
 
   Object.keys(cachedData).sort().forEach(item => {
+
     if (!item.toLowerCase().includes(term)) return;
 
     const row = document.createElement("div");
     row.className = "admin-row";
+
     row.innerHTML = `
       <div class="item-info">
         <img src="${itemImageMap[item] || DEFAULT_ICON}"
@@ -346,55 +315,81 @@ function renderList() {
              data-item="${item}"
              value="${cachedData[item]}">
     `;
+
     el.itemList.appendChild(row);
   });
 }
 
 el.searchInput.oninput = renderList;
 
-/* =========================
-   SAVE + LOG
-========================= */
+/* ⭐⭐⭐ THE CRITICAL FIX ⭐⭐⭐ */
+el.itemList.addEventListener("input", (e) => {
+  if (e.target.classList.contains("price-input")) {
+
+    cachedData[e.target.dataset.item] =
+      Number(e.target.value || 0);
+  }
+});
+
+/* SAVE */
 el.saveBtn.onclick = async () => {
+
   el.statusMsg.textContent = "Saving...";
   el.statusMsg.style.color = "#ccc";
 
-  document.querySelectorAll(".price-input").forEach(i => {
-    cachedData[i.dataset.item] = Number(i.value || 0);
-  });
-
   const changes = {};
+
   for (const k in cachedData) {
     if (cachedData[k] !== originalData[k]) {
-      changes[k] = { from: originalData[k] ?? 0, to: cachedData[k] };
+      changes[k] = {
+        from: originalData[k] ?? 0,
+        to: cachedData[k]
+      };
     }
   }
 
-  if (Object.keys(changes).length === 0) {
+  if (!Object.keys(changes).length) {
     el.statusMsg.textContent = "No changes";
     return;
   }
 
-  /* CRITICAL WRITE */
-  await setDoc(priceDocRef, cachedData);
-  originalData = { ...cachedData };
-
-  /* NON-CRITICAL LOG */
   try {
-    await addDoc(logCollectionRef, {
-      updatedBy: auth.currentUser.email,
-      timestamp: serverTimestamp(),
-      items: changes
-    });
-  } catch (e) {
-    console.warn("Log skipped");
-  }
 
-  el.statusMsg.textContent = "✅ Saved";
-  el.statusMsg.style.color = "#00ff00";
+    // CRITICAL WRITE
+    await setDoc(priceDocRef, cachedData);
+    originalData = { ...cachedData };
+
+    // NON CRITICAL LOG
+    try {
+      await addDoc(logCollectionRef, {
+        updatedBy: auth.currentUser.email,
+        timestamp: serverTimestamp(),
+        items: changes
+      });
+    } catch {
+      console.warn("Log skipped");
+    }
+
+    el.statusMsg.textContent = "✅ Saved";
+    el.statusMsg.style.color = "#00ff00";
+
+  } catch (err) {
+
+    console.error(err);
+    el.statusMsg.textContent = "❌ Save failed";
+    el.statusMsg.style.color = "#ff4444";
+  }
 
   setTimeout(() => el.statusMsg.textContent = "", 3000);
 };
+
+/* OPTIONAL BUT VERY SMART */
+window.addEventListener("beforeunload", (e) => {
+  if (JSON.stringify(cachedData) !== JSON.stringify(originalData)) {
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
 </script>
 
 </body>
