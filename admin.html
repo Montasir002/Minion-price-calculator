@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <title>Bazaar Admin | Secure Mobile</title>
+  <style>
+    :root {
+      --primary: #00ff00;
+      --bg-dark: #121212;
+      --card-bg: #1e1e1e;
+      --border: #333;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background-color: var(--bg-dark);
+      color: white;
+      display: flex;
+      justify-content: center;
+    }
+
+    .admin-container {
+      width: 100%;
+      max-width: 600px;
+      min-height: 100vh;
+      padding: 15px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      margin-bottom: 20px;
+    }
+
+    #loginScreen { margin-top: 15vh; text-align: center; }
+
+    .input-field {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #000;
+      color: white;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+
+    .search-box {
+      width: 100%;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border-radius: 25px;
+      border: 1px solid var(--border);
+      background: #2a2a2a;
+      color: white;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    .item-list {
+      flex-grow: 1;
+      overflow-y: auto;
+      margin: 10px 0;
+      padding-right: 5px;
+      max-height: 60vh;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #181818;
+    }
+
+    .admin-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .item-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .item-icon {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+
+    .price-input {
+      width: 100px;
+      padding: 8px;
+      background: #000;
+      color: var(--primary);
+      border: 1px solid #444;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .footer-actions {
+      position: sticky;
+      bottom: 0;
+      background: var(--bg-dark);
+      padding: 15px 0;
+      width: 100%;
+    }
+
+    .primary-btn {
+      background: var(--primary);
+      color: black;
+      font-weight: 700;
+      border: none;
+      padding: 15px;
+      border-radius: 10px;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .secondary-btn {
+      background: transparent;
+      color: #888;
+      border: 1px solid #444;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .hidden { display: none !important; }
+    #statusMsg { text-align: center; font-size: 0.85rem; margin-top: 10px; min-height: 1.2em; }
+    #loginError { color: #ff4444; font-size: 0.85rem; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="admin-container">
+  <div id="loginScreen" class="card">
+    <img src="https://craftersmc.net/data/assets/logo/newOriginal512.png" style="width:80px; margin-bottom:10px;">
+    <h2>Bazaar Admin</h2>
+    <input type="email" id="email" class="input-field" placeholder="Admin Email">
+    <input type="password" id="password" class="input-field" placeholder="Password">
+    <button id="loginBtn" class="primary-btn">Login</button>
+    <div id="loginError"></div>
+  </div>
+
+  <div id="adminDashboard" class="hidden">
+    <div class="header-flex">
+      <h3>Price Control</h3>
+      <button id="logoutBtn" class="secondary-btn">Logout</button>
+    </div>
+    
+    <input type="text" id="searchInput" class="search-box" placeholder="Search for an item...">
+    
+    <div id="itemList" class="item-list">
+      <div style="padding:20px; text-align:center; color:#666;">Loading items...</div>
+    </div>
+
+    <div class="footer-actions">
+      <button id="saveBtn" class="primary-btn">Save All Changes</button>
+      <div id="statusMsg"></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, setDoc, addDoc, collection, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+/* CONFIG */
+const firebaseConfig = {
+  apiKey: "AIzaSyDy-AQZOGLc65rCIZAHlrdHes4VTvw6QmY",
+  authDomain: "craftersmc-bazar.firebaseapp.com",
+  projectId: "craftersmc-bazar",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+/* DOM */
+const el = {
+  loginScreen: document.getElementById("loginScreen"),
+  adminDashboard: document.getElementById("adminDashboard"),
+  email: document.getElementById("email"),
+  password: document.getElementById("password"),
+  loginBtn: document.getElementById("loginBtn"),
+  logoutBtn: document.getElementById("logoutBtn"),
+  loginError: document.getElementById("loginError"),
+  itemList: document.getElementById("itemList"),
+  searchInput: document.getElementById("searchInput"),
+  saveBtn: document.getElementById("saveBtn"),
+  statusMsg: document.getElementById("statusMsg")
+};
+
+const priceDocRef = doc(db, "prices", "items");
+const logCollectionRef = collection(db, "price_logs");
+const DEFAULT_ICON = "https://craftersmc.net/data/assets/logo/newOriginal512.png";
+
+/* STATE */
+let itemImageMap = {};
+let cachedData = {};
+let originalData = {};
+
+/* LOAD ICONS */
+async function loadIcons() {
+  try {
+    const res = await fetch("./Minion_recipes/items.json");
+    if (!res.ok) return;
+
+    const data = await res.json();
+    data.forEach(i => {
+      if (i.item && i.url) itemImageMap[i.item] = i.url;
+    });
+  } catch {
+    console.warn("Icons skipped");
+  }
+}
+
+/* AUTH */
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    el.loginScreen.classList.remove("hidden");
+    el.adminDashboard.classList.add("hidden");
+    return;
+  }
+
+  el.loginScreen.classList.add("hidden");
+  el.adminDashboard.classList.remove("hidden");
+
+  loadIcons(); // non-blocking
+  await loadPrices();
+});
+
+/* LOGIN */
+el.loginBtn.onclick = async () => {
+  el.loginError.textContent = "";
+
+  try {
+    await signInWithEmailAndPassword(
+      auth,
+      el.email.value.trim(),
+      el.password.value
+    );
+  } catch (err) {
+    el.loginError.textContent = "Login failed";
+    console.error(err);
+  }
+};
+
+el.logoutBtn.onclick = () => signOut(auth);
+
+/* LOAD PRICES */
+async function loadPrices() {
+  el.itemList.innerHTML = "<div style='padding:20px;color:#666'>Loading...</div>";
+
+  try {
+    const snap = await getDoc(priceDocRef);
+
+    if (!snap.exists()) {
+      el.itemList.innerHTML = "<div style='padding:20px'>No price data found.</div>";
+      return;
+    }
+
+    cachedData = { ...snap.data() };
+    originalData = { ...snap.data() };
+
+    renderList();
+
+  } catch (err) {
+    el.itemList.innerHTML = "<div style='padding:20px;color:red'>Load failed</div>";
+    console.error(err);
+  }
+}
+
+/* RENDER */
+function renderList() {
+  const term = el.searchInput.value.toLowerCase();
+  el.itemList.innerHTML = "";
+
+  Object.keys(cachedData).sort().forEach(item => {
+
+    if (!item.toLowerCase().includes(term)) return;
+
+    const row = document.createElement("div");
+    row.className = "admin-row";
+
+    row.innerHTML = `
+      <div class="item-info">
+        <img src="${itemImageMap[item] || DEFAULT_ICON}"
+             class="item-icon"
+             onerror="this.src='${DEFAULT_ICON}'">
+        <label>${item}</label>
+      </div>
+      <input type="number"
+             class="price-input"
+             data-item="${item}"
+             value="${cachedData[item]}">
+    `;
+
+    el.itemList.appendChild(row);
+  });
+}
+
+el.searchInput.oninput = renderList;
+
+/* ⭐⭐⭐ THE CRITICAL FIX ⭐⭐⭐ */
+el.itemList.addEventListener("input", (e) => {
+  if (e.target.classList.contains("price-input")) {
+
+    cachedData[e.target.dataset.item] =
+      Number(e.target.value || 0);
+  }
+});
+
+/* SAVE */
+el.saveBtn.onclick = async () => {
+
+  el.statusMsg.textContent = "Saving...";
+  el.statusMsg.style.color = "#ccc";
+
+  const changes = {};
+
+  for (const k in cachedData) {
+    if (cachedData[k] !== originalData[k]) {
+      changes[k] = {
+        from: originalData[k] ?? 0,
+        to: cachedData[k]
+      };
+    }
+  }
+
+  if (!Object.keys(changes).length) {
+    el.statusMsg.textContent = "No changes";
+    return;
+  }
+
+  try {
+
+    // CRITICAL WRITE
+    await setDoc(priceDocRef, cachedData);
+    originalData = { ...cachedData };
+
+    // NON CRITICAL LOG
+    try {
+      await addDoc(logCollectionRef, {
+        updatedBy: auth.currentUser.email,
+        timestamp: serverTimestamp(),
+        items: changes
+      });
+    } catch {
+      console.warn("Log skipped");
+    }
+
+    el.statusMsg.textContent = "✅ Saved";
+    el.statusMsg.style.color = "#00ff00";
+
+  } catch (err) {
+
+    console.error(err);
+    el.statusMsg.textContent = "❌ Save failed";
+    el.statusMsg.style.color = "#ff4444";
+  }
+
+  setTimeout(() => el.statusMsg.textContent = "", 3000);
+};
+
+/* OPTIONAL BUT VERY SMART */
+window.addEventListener("beforeunload", (e) => {
+  if (JSON.stringify(cachedData) !== JSON.stringify(originalData)) {
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
+</script>
+
+</body>
+</html>
