@@ -179,10 +179,10 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
-  getFirestore, doc, getDoc, setDoc, addDoc, collection, serverTimestamp
+  getFirestore, doc, setDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {
-  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  getAuth, signInWithEmailAndPassword, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* CONFIG */
@@ -196,200 +196,83 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-/* DOM */
-const el = {
-  loginScreen: document.getElementById("loginScreen"),
-  adminDashboard: document.getElementById("adminDashboard"),
-  email: document.getElementById("email"),
-  password: document.getElementById("password"),
-  loginBtn: document.getElementById("loginBtn"),
-  logoutBtn: document.getElementById("logoutBtn"),
-  loginError: document.getElementById("loginError"),
-  itemList: document.getElementById("itemList"),
-  searchInput: document.getElementById("searchInput"),
-  saveBtn: document.getElementById("saveBtn"),
-  statusMsg: document.getElementById("statusMsg")
-};
+const loginScreen = document.getElementById("loginScreen");
+const dashboard = document.getElementById("adminDashboard");
+const loginBtn = document.getElementById("loginBtn");
+const statusMsg = document.getElementById("statusMsg");
 
 const priceDocRef = doc(db, "prices", "items");
-const logCollectionRef = collection(db, "price_logs");
-const DEFAULT_ICON = "https://craftersmc.net/data/assets/logo/newOriginal512.png";
-
-/* STATE */
-let itemImageMap = {};
-let cachedData = {};
-let originalData = {};
-
-/* LOAD ICONS */
-async function loadIcons() {
-  try {
-    const res = await fetch("./Minion_recipes/items.json");
-    if (!res.ok) return;
-
-    const data = await res.json();
-    data.forEach(i => {
-      if (i.item && i.url) itemImageMap[i.item] = i.url;
-    });
-  } catch {
-    console.warn("Icons skipped");
-  }
-}
-
-/* AUTH */
-onAuthStateChanged(auth, async user => {
-  if (!user) {
-    el.loginScreen.classList.remove("hidden");
-    el.adminDashboard.classList.add("hidden");
-    return;
-  }
-
-  el.loginScreen.classList.add("hidden");
-  el.adminDashboard.classList.remove("hidden");
-
-  loadIcons(); // non-blocking
-  await loadPrices();
-});
 
 /* LOGIN */
-el.loginBtn.onclick = async () => {
-  el.loginError.textContent = "";
-
+loginBtn.onclick = async () => {
   try {
     await signInWithEmailAndPassword(
       auth,
-      el.email.value.trim(),
-      el.password.value
+      document.getElementById("email").value.trim(),
+      document.getElementById("password").value
     );
-  } catch (err) {
-    el.loginError.textContent = "Login failed";
-    console.error(err);
+  } catch {
+    document.getElementById("loginError").textContent = "Login failed";
   }
 };
 
-el.logoutBtn.onclick = () => signOut(auth);
-
-/* LOAD PRICES */
-async function loadPrices() {
-  el.itemList.innerHTML = "<div style='padding:20px;color:#666'>Loading...</div>";
-
-  try {
-    const snap = await getDoc(priceDocRef);
-
-    if (!snap.exists()) {
-      el.itemList.innerHTML = "<div style='padding:20px'>No price data found.</div>";
-      return;
-    }
-
-    cachedData = { ...snap.data() };
-    originalData = { ...snap.data() };
-
-    renderList();
-
-  } catch (err) {
-    el.itemList.innerHTML = "<div style='padding:20px;color:red'>Load failed</div>";
-    console.error(err);
-  }
-}
-
-/* RENDER */
-function renderList() {
-  const term = el.searchInput.value.toLowerCase();
-  el.itemList.innerHTML = "";
-
-  Object.keys(cachedData).sort().forEach(item => {
-
-    if (!item.toLowerCase().includes(term)) return;
-
-    const row = document.createElement("div");
-    row.className = "admin-row";
-
-    row.innerHTML = `
-      <div class="item-info">
-        <img src="${itemImageMap[item] || DEFAULT_ICON}"
-             class="item-icon"
-             onerror="this.src='${DEFAULT_ICON}'">
-        <label>${item}</label>
-      </div>
-      <input type="number"
-             class="price-input"
-             data-item="${item}"
-             value="${cachedData[item]}">
-    `;
-
-    el.itemList.appendChild(row);
-  });
-}
-
-el.searchInput.oninput = renderList;
-
-/* ⭐⭐⭐ THE CRITICAL FIX ⭐⭐⭐ */
-el.itemList.addEventListener("input", (e) => {
-  if (e.target.classList.contains("price-input")) {
-
-    cachedData[e.target.dataset.item] =
-      Number(e.target.value || 0);
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    loginScreen.classList.remove("hidden");
+    dashboard.classList.add("hidden");
+  } else {
+    loginScreen.classList.add("hidden");
+    dashboard.classList.remove("hidden");
+    runBulkUpdate(); // auto start
   }
 });
 
-/* SAVE */
-el.saveBtn.onclick = async () => {
+/* BULK UPDATE */
+async function runBulkUpdate() {
 
-  el.statusMsg.textContent = "Saving...";
-  el.statusMsg.style.color = "#ccc";
-
-  const changes = {};
-
-  for (const k in cachedData) {
-    if (cachedData[k] !== originalData[k]) {
-      changes[k] = {
-        from: originalData[k] ?? 0,
-        to: cachedData[k]
-      };
-    }
-  }
-
-  if (!Object.keys(changes).length) {
-    el.statusMsg.textContent = "No changes";
-    return;
-  }
+  statusMsg.textContent = "Loading files...";
 
   try {
 
-    // CRITICAL WRITE
-    await setDoc(priceDocRef, cachedData);
-    originalData = { ...cachedData };
+    // load both files
+    const [pricesRes, itemsRes] = await Promise.all([
+      fetch("./bazaar_prices.json"),
+      fetch("./items_with_ids.json")
+    ]);
 
-    // NON CRITICAL LOG
-    try {
-      await addDoc(logCollectionRef, {
-        updatedBy: auth.currentUser.email,
-        timestamp: serverTimestamp(),
-        items: changes
-      });
-    } catch {
-      console.warn("Log skipped");
-    }
+    const prices = await pricesRes.json();
+    const items = await itemsRes.json();
 
-    el.statusMsg.textContent = "✅ Saved";
-    el.statusMsg.style.color = "#00ff00";
+    // build id -> display name map
+    const idMap = {};
+    items.forEach(i => {
+      if (i.id && i.id !== "not found") {
+        idMap[i.id] = i.item;
+      }
+    });
+
+    // convert structure
+    const finalData = {};
+
+    Object.keys(prices).forEach(id => {
+      const display = idMap[id];
+
+      if (display) {
+        finalData[display] = Number(prices[id]);
+      }
+    });
+
+    statusMsg.textContent = "Uploading to Firestore...";
+
+    await setDoc(priceDocRef, finalData);
+
+    statusMsg.textContent = "✅ Bulk update complete";
 
   } catch (err) {
-
     console.error(err);
-    el.statusMsg.textContent = "❌ Save failed";
-    el.statusMsg.style.color = "#ff4444";
+    statusMsg.textContent = "❌ Bulk update failed";
   }
-
-  setTimeout(() => el.statusMsg.textContent = "", 3000);
-};
-
-/* OPTIONAL BUT VERY SMART */
-window.addEventListener("beforeunload", (e) => {
-  if (JSON.stringify(cachedData) !== JSON.stringify(originalData)) {
-    e.preventDefault();
-    e.returnValue = "";
-  }
-});
+}
 </script>
 
 </body>
