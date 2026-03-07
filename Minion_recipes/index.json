@@ -13,6 +13,7 @@
     { "id": "cocoa_beans_minion", "name": "Cocoa Beans Minion", "file": "cocoa_beans_minion.json" },
     { "id": "cow_minion", "name": "Cow Minion", "file": "cow_minion.json" },
     { "id": "creeper_minion", "name": "Creeper Minion", "file": "creeper_minion.json" },
+    { "id": "dark_oak_log_minion", "name": "Dark Oak Log Minion", "file": "dark_oak_log_minion.json" },
     { "id": "diamond_minion", "name": "Diamond Minion", "file": "diamond_minion.json" },
     { "id": "duck_minion", "name": "Duck Minion", "file": "duck_minion.json" },
     { "id": "emerald_minion", "name": "Emerald Minion", "file": "emerald_minion.json" },
