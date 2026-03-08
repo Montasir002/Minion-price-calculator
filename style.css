@@ -121,3 +121,14 @@ footer { text-align: center; margin-top: 40px; color: var(--text-secondary); }
 .banner-link { color: #fff; text-decoration: underline; font-weight: bold; }
 .close-btn { background: rgba(255,255,255,0.2); border: none; color: white; cursor: pointer; border-radius: 50%; width: 24px; height: 24px; }
 .hidden { display: none !important; }
+
+/* Hide the card if it has no content inside */
+.card:empty {
+    display: none;
+}
+
+/* Specifically for the main grid sections when they are empty */
+#materials:empty, #total:empty {
+    display: none;
+}
+
