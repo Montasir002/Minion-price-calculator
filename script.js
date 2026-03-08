@@ -128,18 +128,4 @@ modeToggle.onclick = () => {
     modeToggle.textContent = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
 };
 
-const helpBanner = document.getElementById("helpBanner");
-const closeBanner = document.getElementById("closeBanner");
-
-if (localStorage.getItem("hideBazaarBanner") === "true") {
-    if (helpBanner) helpBanner.classList.add("hidden");
-}
-
-if (closeBanner) {
-    closeBanner.onclick = () => {
-        helpBanner.classList.add("hidden");
-        localStorage.setItem("hideBazaarBanner", "true");
-    };
-}
-
 initializeData();
