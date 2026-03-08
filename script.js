@@ -30,7 +30,7 @@ async function initializeData() {
             window.loadPricesFromFirebase()
         ]);
 
-        itemData.forEach(e => { if (e.item) itemImageMap[e.item] = e.url; });
+        itemData.forEach(e => { if (e.id) itemImageMap[e.id] = e.url; });
         firebasePrices = prices || {};
 
         // Load list
