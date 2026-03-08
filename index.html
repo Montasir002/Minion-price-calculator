@@ -61,7 +61,7 @@
 
     window.loadPricesFromFirebase = async function () {
       try {
-        const snap = await getDoc(doc(db, "prices", "items"));
+        const snap = await getDoc(doc(db, "prices", "itemsV2"));
         return snap.exists() ? snap.data() : {};
       } catch (e) {
         console.error("Firebase Error:", e);
