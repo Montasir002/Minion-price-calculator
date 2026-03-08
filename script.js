@@ -1,5 +1,6 @@
 const LIB_BASE = "./Minion_recipes/";
 const itemImageMap = {};
+const itemIDMap = {}; // Maps "Display Name" to "id"
 const DEFAULT_ITEM_ICON = "https://craftersmc.net/data/assets/logo/newOriginal512.png";
 
 const minionSelect = document.getElementById("minionSelect");
@@ -30,7 +31,13 @@ async function initializeData() {
             window.loadPricesFromFirebase()
         ]);
 
-        itemData.forEach(e => { if (e.id) itemImageMap[e.id] = e.url; });
+        // Map data using ID for logic and Image mapping
+        itemData.forEach(e => { 
+            if (e.id) {
+                itemImageMap[e.id] = e.url; 
+                itemIDMap[e.item] = e.id; // Link "Acacia Log" -> "acacia_log"
+            }
+        });
         firebasePrices = prices || {};
 
         // Load list
@@ -48,7 +55,7 @@ async function initializeData() {
     }
 }
 
-function getItemImage(itemName) { return itemImageMap[itemName] || DEFAULT_ITEM_ICON; }
+function getItemImage(itemId) { return itemImageMap[itemId] || DEFAULT_ITEM_ICON; }
 
 minionSelect.addEventListener("change", async () => {
     if (!minionSelect.value) return;
@@ -70,12 +77,15 @@ minionSelect.addEventListener("change", async () => {
     }
 
     materialsDiv.innerHTML = "<h3>Bazaar Prices</h3>";
-    Array.from(materialSet).sort().forEach(item => {
-        const price = firebasePrices[item] ?? 0;
+    Array.from(materialSet).sort().forEach(itemName => {
+        // Convert the Name to ID for the data-item attribute and price lookup
+        const itemId = itemIDMap[itemName] || itemName;
+        const price = firebasePrices[itemId] ?? 0;
+        
         materialsDiv.innerHTML += `
             <div class="material-row">
-                <span><img src="${getItemImage(item)}" class="item-icon">${item}</span>
-                <input type="number" data-item="${item}" value="${price}">
+                <span><img src="${getItemImage(itemId)}" class="item-icon">${itemName}</span>
+                <input type="number" data-item="${itemId}" value="${price}">
             </div>`;
     });
 
@@ -89,6 +99,7 @@ minionSelect.addEventListener("change", async () => {
 function calculate(minion) {
     const currentPrices = {};
     document.querySelectorAll("#materials input").forEach(i => {
+        // Now storing prices by ID
         currentPrices[i.dataset.item] = Number(i.value || 0);
     });
 
@@ -97,7 +108,9 @@ function calculate(minion) {
     for (let t = 1; t <= minion.max_tier; t++) {
         let tierCost = 0;
         (minion.tiers[t] || []).forEach(m => {
-            tierCost += (currentPrices[m.item] || 0) * m.qty;
+            // Find the ID for the recipe's item name
+            const itemId = itemIDMap[m.item] || m.item;
+            tierCost += (currentPrices[itemId] || 0) * m.qty;
         });
         cumulative += tierCost;
         totalDiv.innerHTML += `
