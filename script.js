@@ -12,7 +12,6 @@ let firebasePrices = {};
 
 // --- INITIALIZATION ---
 async function initializeData() {
-    // Helper to wait for Firebase variables to be injected by the HTML
     const awaitFirebase = () => {
         return new Promise((resolve) => {
             const check = () => {
@@ -28,8 +27,6 @@ async function initializeData() {
 
     try {
         await awaitFirebase();
-        
-        // Load items and prices in parallel
         const [itemData, prices] = await Promise.all([
             fetch(LIB_BASE + "items.json").then(r => r.json()),
             window.loadPricesFromFirebase()
@@ -37,7 +34,6 @@ async function initializeData() {
 
         firebasePrices = prices || {};
 
-        // Map IDs to Names and Images
         itemData.forEach(e => { 
             if (e.id) {
                 itemImageMap[e.id] = e.url; 
@@ -45,24 +41,16 @@ async function initializeData() {
             }
         });
 
-        // Load the minion list (index.json)
-        const indexRes = await fetch(LIB_BASE + "index.json");
-        const indexData = await indexRes.json();
-        
+        const data = await fetch(LIB_BASE + "index.json").then(r => r.json());
         minionSelect.innerHTML = '<option value="" disabled selected>Select Minion type</option>';
-        indexData.minions.forEach(m => {
+        data.minions.forEach(m => {
             const opt = document.createElement("option");
-            opt.value = m.file; 
-            opt.textContent = m.name;
+            opt.value = m.file; opt.textContent = m.name;
             minionSelect.appendChild(opt);
         });
-        
         minionSelect.disabled = false;
-        console.log("✅ Initialization complete.");
-
     } catch (err) {
-        console.error("❌ Init error:", err);
-        materialsDiv.innerHTML = "Error loading initial data.";
+        console.error("Init error:", err);
     }
 }
 
@@ -72,7 +60,6 @@ function getItemImage(itemId) { return itemImageMap[itemId] || DEFAULT_ITEM_ICON
 
 minionSelect.addEventListener("change", async () => {
     if (!minionSelect.value) return;
-
     materialsDiv.innerHTML = "Loading recipe...";
     totalDiv.innerHTML = "";
     
@@ -90,6 +77,7 @@ minionSelect.addEventListener("change", async () => {
 
         for (let t = 1; t <= minion.max_tier; t++) {
             (minion.tiers[t] || []).forEach(m => {
+                // Only add to the set if NOT in the ignore list
                 if (!ignoreItems.includes(m.item)) materialSet.add(m.item);
             });
         }
@@ -114,7 +102,6 @@ minionSelect.addEventListener("change", async () => {
 
     } catch (error) {
         console.error("Error loading minion data:", error);
-        materialsDiv.innerHTML = "Error loading recipe.";
     }
 });
 
@@ -122,36 +109,31 @@ minionSelect.addEventListener("change", async () => {
 
 async function calculate(minion) {
     const cumulativeDiv = document.getElementById("cumulativeMaterials");
-
     const currentPrices = {};
     document.querySelectorAll("#materials input").forEach(i => {
         currentPrices[i.dataset.item] = Number(i.value || 0);
     });
 
     try {
-        const [ignoreRes, itemsRes] = await Promise.all([
-            fetch(LIB_BASE + "ignore_list.json"),
-            fetch(LIB_BASE + "items.json")
-        ]);
-        
+        const ignoreRes = await fetch(LIB_BASE + "ignore_list.json");
         const ignoreData = await ignoreRes.json();
-        const itemsJson = await itemsRes.json();
-        
         const ignoreItems = (ignoreData.ignore || []).map(i => i.item);
+
         const tierResults = {};
         let runningMaterialTotals = {};
         let cumulativeCost = 0;
 
-        const localImageMap = {};
-        itemsJson.forEach(i => { if(i.item && i.url) localImageMap[i.item] = i.url; });
-
         for (let t = 1; t <= minion.max_tier; t++) {
             let tierCost = 0;
             (minion.tiers[t] || []).forEach(m => {
-                const itemId = Object.keys(itemDisplayNameMap).find(key => itemDisplayNameMap[key] === m.item) || m.item;
-                const price = currentPrices[itemId] || 0;
-                runningMaterialTotals[m.item] = (runningMaterialTotals[m.item] || 0) + m.qty;
-                if (!ignoreItems.includes(m.item)) tierCost += price * m.qty;
+                // If the item is in the ignore list, we skip it entirely
+                if (!ignoreItems.includes(m.item)) {
+                    const itemId = Object.keys(itemDisplayNameMap).find(key => itemDisplayNameMap[key] === m.item) || m.item;
+                    const price = currentPrices[itemId] || 0;
+                    
+                    runningMaterialTotals[m.item] = (runningMaterialTotals[m.item] || 0) + m.qty;
+                    tierCost += price * m.qty;
+                }
             });
 
             cumulativeCost += tierCost;
@@ -166,7 +148,7 @@ async function calculate(minion) {
             let html = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
                     <h3 style="margin:0; font-size:1.2rem;">Total Materials</h3>
-                    <select id="tierSelector" style="padding:6px 12px; border-radius:8px; border:1px solid #ccc; font-family:inherit; cursor:pointer; background-color: transparent; color: inherit;">
+                    <select id="tierSelector" style="padding:6px 12px; border-radius:8px; border:1px solid #ccc; background-color: transparent; color: inherit;">
                         ${Object.keys(tierResults).map(t => `<option value="${t}" ${t == tier ? 'selected' : ''} style="color:black;">Tier ${t}</option>`).join('')}
                     </select>
                 </div>`;
@@ -174,18 +156,16 @@ async function calculate(minion) {
             Object.entries(data.materials).forEach(([name, qty]) => {
                 const itemId = Object.keys(itemDisplayNameMap).find(key => itemDisplayNameMap[key] === name) || name;
                 const unitPrice = currentPrices[itemId] || 0;
-                const isIgnored = ignoreItems.includes(name);
-                const totalItemPrice = isIgnored ? 0 : (unitPrice * qty);
-                const imgUrl = localImageMap[name] || getItemImage(itemId);
+                const totalItemPrice = unitPrice * qty;
 
                 html += `
                     <div class="material-row" style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid rgba(128,128,128,0.1);">
                         <span style="display:flex; align-items:center; gap:10px;">
-                            <img src="${imgUrl}" class="item-icon" style="width:24px; height:24px;" onerror="this.src='${DEFAULT_ITEM_ICON}'">
+                            <img src="${getItemImage(itemId)}" class="item-icon" style="width:24px; height:24px;">
                             ${name} <span style="color:#888;">x${qty.toLocaleString()}</span>
                         </span>
-                        <span style="color: ${isIgnored ? '#888' : 'var(--primary)'}; font-weight: 600;">
-                            ${isIgnored ? '0 coins' : totalItemPrice.toLocaleString() + ' coins'}
+                        <span style="color: var(--primary); font-weight: 600;">
+                            ${totalItemPrice.toLocaleString()} coins
                         </span>
                     </div>`;
             });
@@ -196,8 +176,10 @@ async function calculate(minion) {
                     <span style="color:var(--primary);">${data.totalCost.toLocaleString()} coins</span>
                 </div>`;
 
-            cumulativeDiv.innerHTML = html;
-            document.getElementById("tierSelector").onchange = (e) => renderMaterialCard(e.target.value);
+            if (cumulativeDiv) {
+                cumulativeDiv.innerHTML = html;
+                document.getElementById("tierSelector").onchange = (e) => renderMaterialCard(e.target.value);
+            }
         };
 
         renderMaterialCard(minion.max_tier);
@@ -210,7 +192,6 @@ async function calculate(minion) {
                     <span class="tier-price">${tierResults[t].totalCost.toLocaleString()} coins</span>
                 </div>`;
         }
-
     } catch (err) {
         console.error("Calc error:", err);
     }
