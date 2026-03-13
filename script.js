@@ -60,13 +60,63 @@ function getItemImage(itemId) { return itemImageMap[itemId] || DEFAULT_ITEM_ICON
 
 minionSelect.addEventListener("change", async () => {
     if (!minionSelect.value) return;
+
+    // 1. Clear all result areas immediately
     materialsDiv.innerHTML = "Loading recipe...";
     totalDiv.innerHTML = "";
+    
+    // Clear the new cumulative container
+    const cumulativeDiv = document.getElementById("cumulativeMaterials");
+    if (cumulativeDiv) {
+        cumulativeDiv.innerHTML = "";
+    }
 
-    const [ignoreData, minion] = await Promise.all([
-        fetch(LIB_BASE + "ignore_list.json").then(r => r.json()),
-        fetch(LIB_BASE + minionSelect.value).then(r => r.json())
-    ]);
+    try {
+        // 2. Fetch the ignore list and the specific minion recipe
+        const [ignoreData, minion] = await Promise.all([
+            fetch(LIB_BASE + "ignore_list.json").then(r => r.json()),
+            fetch(LIB_BASE + minionSelect.value).then(r => r.json())
+        ]);
+
+        const ignoreItems = (ignoreData.ignore || []).map(i => i.item);
+        const materialSet = new Set();
+
+        // 3. Identify which items from the recipe need price inputs
+        for (let t = 1; t <= minion.max_tier; t++) {
+            (minion.tiers[t] || []).forEach(m => {
+                if (!ignoreItems.includes(m.item)) {
+                    materialSet.add(m.item);
+                }
+            });
+        }
+
+        // 4. Render the Price Input section
+        materialsDiv.innerHTML = "<h3>Bazaar Prices</h3>";
+        Array.from(materialSet).sort().forEach(itemName => {
+            // Find ID in items.json for database lookup
+            const itemId = Object.keys(itemDisplayNameMap).find(key => itemDisplayNameMap[key] === itemName) || itemName;
+            const price = firebasePrices[itemId] ?? 0;
+            
+            materialsDiv.innerHTML += `
+                <div class="material-row">
+                    <span><img src="${getItemImage(itemId)}" class="item-icon">${itemName}</span>
+                    <input type="number" data-item="${itemId}" value="${price}">
+                </div>`;
+        });
+
+        // 5. Add the calculation button
+        const btn = document.createElement("button");
+        btn.className = "primary-btn";
+        btn.textContent = "Calculate Total Cost";
+        btn.onclick = () => calculate(minion);
+        materialsDiv.appendChild(btn);
+
+    } catch (error) {
+        console.error("Error loading minion data:", error);
+        materialsDiv.innerHTML = "Error loading recipe. Please try again.";
+    }
+});
+
 
     const ignoreItems = (ignoreData.ignore || []).map(i => i.item);
     const materialSet = new Set();
