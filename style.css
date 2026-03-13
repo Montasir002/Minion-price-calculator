@@ -128,6 +128,11 @@ footer { text-align: center; margin-top: 40px; color: var(--text-secondary); }
     display: none;
 }
 
+#cumulativeMaterials:empty {
+    display: none;
+}
+
+
 /* Ensure the grid adjusts when items are hidden */
 .main-grid {
     display: grid;
