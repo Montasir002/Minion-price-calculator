@@ -99,29 +99,94 @@ minionSelect.addEventListener("change", async () => {
     materialsDiv.appendChild(btn);
 });
 
+
 function calculate(minion) {
     const currentPrices = {};
     document.querySelectorAll("#materials input").forEach(i => {
         currentPrices[i.dataset.item] = Number(i.value || 0);
     });
 
-    let cumulative = 0;
-    totalDiv.innerHTML = "<h3>Cost Per Tier</h3>";
+    // We will store all tiers' results here to make the dropdown work instantly
+    const tierResults = {};
+    let runningMaterialTotals = {};
+    let cumulativeCost = 0;
+
     for (let t = 1; t <= minion.max_tier; t++) {
         let tierCost = 0;
+        
+        // Add current tier materials to the running totals
         (minion.tiers[t] || []).forEach(m => {
-            // Find the ID so we can get the price
             const itemId = Object.keys(itemDisplayNameMap).find(key => itemDisplayNameMap[key] === m.item) || m.item;
-            tierCost += (currentPrices[itemId] || 0) * m.qty;
+            const price = currentPrices[itemId] || 0;
+            
+            // Track quantity
+            runningMaterialTotals[m.item] = (runningMaterialTotals[m.item] || 0) + m.qty;
+            tierCost += price * m.qty;
         });
-        cumulative += tierCost;
+
+        cumulativeCost += tierCost;
+
+        // Save a "snapshot" of materials and cost for this specific tier
+        tierResults[t] = {
+            totalCost: cumulativeCost,
+            materials: JSON.parse(JSON.stringify(runningMaterialTotals))
+        };
+    }
+
+    // Function to render the Materials Card based on selected Tier
+    const renderMaterialCard = (tier) => {
+        const data = tierResults[tier];
+        let html = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Total Materials List</h3>
+                <select id="tierSelector" style="padding:5px; border-radius:5px; background:#333; color:white;">
+                    ${Object.keys(tierResults).map(t => `<option value="${t}" ${t == tier ? 'selected' : ''}>Tier ${t}</option>`).join('')}
+                </select>
+            </div>
+            <hr style="border:0; border-top:1px solid #333; margin:10px 0;">
+        `;
+
+        Object.entries(data.materials).forEach(([name, qty]) => {
+            const itemId = Object.keys(itemDisplayNameMap).find(key => itemDisplayNameMap[key] === name) || name;
+            const unitPrice = currentPrices[itemId] || 0;
+            const totalItemPrice = unitPrice * qty;
+
+            html += `
+                <div class="material-row" style="display:flex; justify-content:space-between; font-size:0.9rem;">
+                    <span>${name} x${qty.toLocaleString()}</span>
+                    <span style="color: var(--primary);">${totalItemPrice.toLocaleString()} coins</span>
+                </div>
+            `;
+        });
+
+        html += `
+            <div style="margin-top:15px; padding-top:10px; border-top:2px solid var(--primary); display:flex; justify-content:space-between; font-weight:bold;">
+                <span>Total Cost</span>
+                <span>${data.totalCost.toLocaleString()} coins</span>
+            </div>
+        `;
+
+        const container = document.getElementById("cumulativeMaterials");
+        container.innerHTML = html;
+
+        // Add listener to the new dropdown
+        document.getElementById("tierSelector").onchange = (e) => renderMaterialCard(e.target.value);
+    };
+
+    // Initial render for the Max Tier
+    renderMaterialCard(minion.max_tier);
+
+    // Also update your original Cost Per Tier list
+    totalDiv.innerHTML = "<h3>Cost Per Tier</h3>";
+    for (let t = 1; t <= minion.max_tier; t++) {
         totalDiv.innerHTML += `
             <div class="tier-row">
                 <span>${minion.name} T${t}</span>
-                <span class="tier-price">${cumulative.toLocaleString()} coins</span>
+                <span class="tier-price">${tierResults[t].totalCost.toLocaleString()} coins</span>
             </div>`;
     }
 }
+
 
 modeToggle.onclick = () => {
     document.body.classList.toggle("dark-mode");
