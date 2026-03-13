@@ -150,31 +150,43 @@ minionSelect.addEventListener("change", async () => {
 });
 
 
-function calculate(minion) {
+async function calculate(minion) {
+    const materialsDiv = document.getElementById("materials");
+    const totalDiv = document.getElementById("total");
+    const cumulativeDiv = document.getElementById("cumulativeMaterials");
+
+    // 1. Get user-input prices from the UI
     const currentPrices = {};
     document.querySelectorAll("#materials input").forEach(i => {
         currentPrices[i.dataset.item] = Number(i.value || 0);
     });
 
-    // We need the ignore list again for the cumulative view
-    fetch(LIB_BASE + "ignore_list.json")
-    .then(r => r.json())
-    .then(ignoreData => {
+    try {
+        // 2. Use the variables already defined in your global scope
+        const ignoreRes = await fetch(LIB_BASE + "ignore_list.json");
+        const itemsRes = await fetch("./Minion_recipes/items.json");
+        
+        const ignoreData = await ignoreRes.json();
+        const itemsJson = await itemsRes.json();
+        
         const ignoreItems = (ignoreData.ignore || []).map(i => i.item);
         const tierResults = {};
         let runningMaterialTotals = {};
         let cumulativeCost = 0;
 
+        // Map icons for quick lookup
+        const localImageMap = {};
+        itemsJson.forEach(i => { if(i.item && i.url) localImageMap[i.item] = i.url; });
+
+        // 3. Logic for Tiers
         for (let t = 1; t <= minion.max_tier; t++) {
             let tierCost = 0;
             (minion.tiers[t] || []).forEach(m => {
                 const itemId = Object.keys(itemDisplayNameMap).find(key => itemDisplayNameMap[key] === m.item) || m.item;
                 const price = currentPrices[itemId] || 0;
                 
-                // Track quantity for ALL items
                 runningMaterialTotals[m.item] = (runningMaterialTotals[m.item] || 0) + m.qty;
                 
-                // Only add to cost if NOT in the ignore list
                 if (!ignoreItems.includes(m.item)) {
                     tierCost += price * m.qty;
                 }
@@ -187,13 +199,14 @@ function calculate(minion) {
             };
         }
 
+        // 4. Render the UI
         const renderMaterialCard = (tier) => {
             const data = tierResults[tier];
             let html = `
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <h3 style="margin:0;">Total Materials List</h3>
-                    <select id="tierSelector" style="padding:8px; border-radius:8px; background:#121212; color:white; border:1px solid #333;">
-                        ${Object.keys(tierResults).map(t => `<option value="${t}" ${t == tier ? 'selected' : ''}>Tier ${t}</option>`).join('')}
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0; font-size:1.2rem;">Total Materials</h3>
+                    <select id="tierSelector" style="padding:6px 12px; border-radius:8px; border:1px solid #ccc; font-family:inherit; cursor:pointer; background-color: transparent; color: inherit;">
+                        ${Object.keys(tierResults).map(t => `<option value="${t}" ${t == tier ? 'selected' : ''} style="color:black;">Tier ${t}</option>`).join('')}
                     </select>
                 </div>
             `;
@@ -203,35 +216,35 @@ function calculate(minion) {
                 const unitPrice = currentPrices[itemId] || 0;
                 const isIgnored = ignoreItems.includes(name);
                 const totalItemPrice = isIgnored ? 0 : (unitPrice * qty);
+                const imgUrl = localImageMap[name] || getItemImage(itemId);
 
                 html += `
-                    <div class="material-row" style="display:flex; justify-content:space-between; align-items:center; padding: 8px 0; border-bottom: 1px solid #222;">
+                    <div class="material-row" style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid rgba(128,128,128,0.1);">
                         <span style="display:flex; align-items:center; gap:10px;">
-                            <img src="${getItemImage(itemId)}" class="item-icon" style="width:24px; height:24px;">
+                            <img src="${imgUrl}" class="item-icon" style="width:24px; height:24px;" onerror="this.src='https://craftersmc.net/data/assets/logo/newOriginal512.png'">
                             ${name} <span style="color:#888;">x${qty.toLocaleString()}</span>
                         </span>
-                        <span style="color: ${isIgnored ? '#666' : 'var(--primary)'}; font-size: 0.9rem;">
-                            ${isIgnored ? '---' : totalItemPrice.toLocaleString() + ' coins'}
+                        <span style="color: ${isIgnored ? '#888' : 'var(--primary)'}; font-weight: 600;">
+                            ${isIgnored ? '0 coins' : totalItemPrice.toLocaleString() + ' coins'}
                         </span>
                     </div>
                 `;
             });
 
             html += `
-                <div style="margin-top:15px; padding:12px; background:rgba(0,255,0,0.05); border-radius:8px; border:1px solid rgba(0,255,0,0.2); display:flex; justify-content:space-between; font-weight:bold;">
+                <div style="margin-top:20px; padding:15px; background:rgba(0,255,0,0.08); border-radius:10px; border:1px solid rgba(0,255,0,0.2); display:flex; justify-content:space-between; font-weight:bold; font-size:1.1rem;">
                     <span>Cumulative Cost</span>
                     <span style="color:var(--primary);">${data.totalCost.toLocaleString()} coins</span>
                 </div>
             `;
 
-            const container = document.getElementById("cumulativeMaterials");
-            container.innerHTML = html;
+            cumulativeDiv.innerHTML = html;
             document.getElementById("tierSelector").onchange = (e) => renderMaterialCard(e.target.value);
         };
 
         renderMaterialCard(minion.max_tier);
 
-        // Update the original Cost Per Tier list
+        // Update the Cost Per Tier list
         totalDiv.innerHTML = "<h3>Cost Per Tier</h3>";
         for (let t = 1; t <= minion.max_tier; t++) {
             totalDiv.innerHTML += `
@@ -240,8 +253,13 @@ function calculate(minion) {
                     <span class="tier-price">${tierResults[t].totalCost.toLocaleString()} coins</span>
                 </div>`;
         }
-    });
+
+    } catch (err) {
+        console.error("Calculation Error:", err);
+        alert("Failed to calculate. Check if files are missing.");
+    }
 }
+
 
 
 
