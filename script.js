@@ -156,86 +156,93 @@ function calculate(minion) {
         currentPrices[i.dataset.item] = Number(i.value || 0);
     });
 
-    // We will store all tiers' results here to make the dropdown work instantly
-    const tierResults = {};
-    let runningMaterialTotals = {};
-    let cumulativeCost = 0;
+    // We need the ignore list again for the cumulative view
+    fetch(LIB_BASE + "ignore_list.json")
+    .then(r => r.json())
+    .then(ignoreData => {
+        const ignoreItems = (ignoreData.ignore || []).map(i => i.item);
+        const tierResults = {};
+        let runningMaterialTotals = {};
+        let cumulativeCost = 0;
 
-    for (let t = 1; t <= minion.max_tier; t++) {
-        let tierCost = 0;
-        
-        // Add current tier materials to the running totals
-        (minion.tiers[t] || []).forEach(m => {
-            const itemId = Object.keys(itemDisplayNameMap).find(key => itemDisplayNameMap[key] === m.item) || m.item;
-            const price = currentPrices[itemId] || 0;
-            
-            // Track quantity
-            runningMaterialTotals[m.item] = (runningMaterialTotals[m.item] || 0) + m.qty;
-            tierCost += price * m.qty;
-        });
+        for (let t = 1; t <= minion.max_tier; t++) {
+            let tierCost = 0;
+            (minion.tiers[t] || []).forEach(m => {
+                const itemId = Object.keys(itemDisplayNameMap).find(key => itemDisplayNameMap[key] === m.item) || m.item;
+                const price = currentPrices[itemId] || 0;
+                
+                // Track quantity for ALL items
+                runningMaterialTotals[m.item] = (runningMaterialTotals[m.item] || 0) + m.qty;
+                
+                // Only add to cost if NOT in the ignore list
+                if (!ignoreItems.includes(m.item)) {
+                    tierCost += price * m.qty;
+                }
+            });
 
-        cumulativeCost += tierCost;
+            cumulativeCost += tierCost;
+            tierResults[t] = {
+                totalCost: cumulativeCost,
+                materials: JSON.parse(JSON.stringify(runningMaterialTotals))
+            };
+        }
 
-        // Save a "snapshot" of materials and cost for this specific tier
-        tierResults[t] = {
-            totalCost: cumulativeCost,
-            materials: JSON.parse(JSON.stringify(runningMaterialTotals))
-        };
-    }
-
-    // Function to render the Materials Card based on selected Tier
-    const renderMaterialCard = (tier) => {
-        const data = tierResults[tier];
-        let html = `
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3>Total Materials List</h3>
-                <select id="tierSelector" style="padding:5px; border-radius:5px; background:#333; color:white;">
-                    ${Object.keys(tierResults).map(t => `<option value="${t}" ${t == tier ? 'selected' : ''}>Tier ${t}</option>`).join('')}
-                </select>
-            </div>
-            <hr style="border:0; border-top:1px solid #333; margin:10px 0;">
-        `;
-
-        Object.entries(data.materials).forEach(([name, qty]) => {
-            const itemId = Object.keys(itemDisplayNameMap).find(key => itemDisplayNameMap[key] === name) || name;
-            const unitPrice = currentPrices[itemId] || 0;
-            const totalItemPrice = unitPrice * qty;
-
-            html += `
-                <div class="material-row" style="display:flex; justify-content:space-between; font-size:0.9rem;">
-                    <span>${name} x${qty.toLocaleString()}</span>
-                    <span style="color: var(--primary);">${totalItemPrice.toLocaleString()} coins</span>
+        const renderMaterialCard = (tier) => {
+            const data = tierResults[tier];
+            let html = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3 style="margin:0;">Total Materials List</h3>
+                    <select id="tierSelector" style="padding:8px; border-radius:8px; background:#121212; color:white; border:1px solid #333;">
+                        ${Object.keys(tierResults).map(t => `<option value="${t}" ${t == tier ? 'selected' : ''}>Tier ${t}</option>`).join('')}
+                    </select>
                 </div>
             `;
-        });
 
-        html += `
-            <div style="margin-top:15px; padding-top:10px; border-top:2px solid var(--primary); display:flex; justify-content:space-between; font-weight:bold;">
-                <span>Total Cost</span>
-                <span>${data.totalCost.toLocaleString()} coins</span>
-            </div>
-        `;
+            Object.entries(data.materials).forEach(([name, qty]) => {
+                const itemId = Object.keys(itemDisplayNameMap).find(key => itemDisplayNameMap[key] === name) || name;
+                const unitPrice = currentPrices[itemId] || 0;
+                const isIgnored = ignoreItems.includes(name);
+                const totalItemPrice = isIgnored ? 0 : (unitPrice * qty);
 
-        const container = document.getElementById("cumulativeMaterials");
-        container.innerHTML = html;
+                html += `
+                    <div class="material-row" style="display:flex; justify-content:space-between; align-items:center; padding: 8px 0; border-bottom: 1px solid #222;">
+                        <span style="display:flex; align-items:center; gap:10px;">
+                            <img src="${getItemImage(itemId)}" class="item-icon" style="width:24px; height:24px;">
+                            ${name} <span style="color:#888;">x${qty.toLocaleString()}</span>
+                        </span>
+                        <span style="color: ${isIgnored ? '#666' : 'var(--primary)'}; font-size: 0.9rem;">
+                            ${isIgnored ? '---' : totalItemPrice.toLocaleString() + ' coins'}
+                        </span>
+                    </div>
+                `;
+            });
 
-        // Add listener to the new dropdown
-        document.getElementById("tierSelector").onchange = (e) => renderMaterialCard(e.target.value);
-    };
+            html += `
+                <div style="margin-top:15px; padding:12px; background:rgba(0,255,0,0.05); border-radius:8px; border:1px solid rgba(0,255,0,0.2); display:flex; justify-content:space-between; font-weight:bold;">
+                    <span>Cumulative Cost</span>
+                    <span style="color:var(--primary);">${data.totalCost.toLocaleString()} coins</span>
+                </div>
+            `;
 
-    // Initial render for the Max Tier
-    renderMaterialCard(minion.max_tier);
+            const container = document.getElementById("cumulativeMaterials");
+            container.innerHTML = html;
+            document.getElementById("tierSelector").onchange = (e) => renderMaterialCard(e.target.value);
+        };
 
-    // Also update your original Cost Per Tier list
-    totalDiv.innerHTML = "<h3>Cost Per Tier</h3>";
-    for (let t = 1; t <= minion.max_tier; t++) {
-        totalDiv.innerHTML += `
-            <div class="tier-row">
-                <span>${minion.name} T${t}</span>
-                <span class="tier-price">${tierResults[t].totalCost.toLocaleString()} coins</span>
-            </div>`;
-    }
+        renderMaterialCard(minion.max_tier);
+
+        // Update the original Cost Per Tier list
+        totalDiv.innerHTML = "<h3>Cost Per Tier</h3>";
+        for (let t = 1; t <= minion.max_tier; t++) {
+            totalDiv.innerHTML += `
+                <div class="tier-row">
+                    <span>${minion.name} T${t}</span>
+                    <span class="tier-price">${tierResults[t].totalCost.toLocaleString()} coins</span>
+                </div>`;
+        }
+    });
 }
+
 
 
 modeToggle.onclick = () => {
