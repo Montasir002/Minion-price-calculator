@@ -1,9 +1,0 @@
-{
-  "ignore": [
-    { "item": "Wooden Sword" },
-    { "item": "Wooden Axe" },
-    { "item": "Wooden Pickaxe" },
-    { "item": "Wooden Hoe" },
-    { "item": "Bow" }
-  ]
-}
