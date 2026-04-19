@@ -1,0 +1,146 @@
+/* =========================
+   THEME VARIABLES
+========================= */
+:root {
+  --bg-color: #f8fafc;
+  --card-bg: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --accent: #3b82f6;
+  --border: #e2e8f0;
+  --input-bg: #ffffff;
+}
+
+.dark-mode {
+  --bg-color: #0f172a;
+  --card-bg: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --accent: #60a5fa;
+  --border: #334155;
+  --input-bg: #0f172a;
+}
+
+* { box-sizing: border-box; transition: background-color 0.2s ease; }
+
+body {
+  margin: 0; padding: 20px;
+  background: var(--bg-color);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  display: flex; justify-content: center;
+}
+
+.app-container { width: 100%; max-width: 1000px; }
+
+header { text-align: center; margin-bottom: 30px; }
+header h1 { margin: 0; font-size: 2.2rem; color: var(--accent); }
+
+.theme-btn {
+  position: fixed; top: 16px; right: 16px;
+  padding: 8px 14px; border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card-bg); color: var(--text-primary);
+  cursor: pointer; z-index: 100;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+}
+
+select {
+  width: 100%; padding: 12px; border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--input-bg); color: var(--text-primary);
+}
+
+.primary-btn {
+  width: 100%; margin-top: 16px;
+  background: var(--accent); color: white;
+  border: none; padding: 12px;
+  border-radius: 10px; font-weight: 600; cursor: pointer;
+}
+
+/* =========================
+   MATERIAL LIST UI
+========================= */
+.material-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.material-row span {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.item-icon {
+  width: 24px; height: 24px;
+  margin-right: 10px;
+  image-rendering: pixelated;
+}
+
+.material-row input {
+  width: 100px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.tier-row {
+  display: flex; justify-content: space-between;
+  padding: 12px; margin-top: 10px;
+  background: var(--bg-color); border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.tier-price { font-weight: 700; color: #00ff00; }
+
+/* Hide the containers completely when they have no content */
+#materials:empty,
+#total:empty,
+#cumulativeMaterials:empty {
+  display: none;
+}
+
+/* Grid layout — single column by default, adapts when content is present */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+.main-grid:has(#materials:not(:empty)) {
+  gap: 20px;
+  margin-top: 20px;
+}
+
+@media (min-width: 768px) {
+  .main-grid:has(#materials:not(:empty)) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* DEAD CODE REMOVED: .banner, .banner-content, .banner-link, .close-btn
+   No banner HTML exists anywhere in the project. */
+
+/* DEAD CODE REMOVED: First @media (min-width: 768px) block that set
+   .main-grid { grid-template-columns: 1fr 1fr } unconditionally —
+   it was immediately overridden by the :has() rule below it. */
+
+.hidden { display: none !important; }
+
+footer { text-align: center; margin-top: 40px; color: var(--text-secondary); }
+.discord-link { color: #7289da; text-decoration: none; font-weight: bold; }
